@@ -11,7 +11,7 @@ Doc link at
 
 Before setting up the project locally, ensure you have the following prerequisites installed:
 
-- [Go](https://go.dev) (>=1.22.3)
+- [Go](https://go.dev) (>=1.22.3).
 - A Database System (e.g., PostgreSQL, MySQL, SQLite)
 
 ### How to run API Locally
