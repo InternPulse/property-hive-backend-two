@@ -14,13 +14,13 @@ export const addProperty = async (req, res) => {
             return res.status(400).json({ message: "Missing required fields: name, location, price, status" });
         }
 
-        const findProperty = await prisma.property.findUnique({
+        const findProperty = await prisma.property.findFirst({
             where: {
                 name: name,  
             }
         });
 
-    
+   
         if (findProperty) {
             return res.status(400).json({ message: "Property already exists" });
         }

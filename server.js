@@ -1,6 +1,7 @@
 import "dotenv/config"; 
 
 import express from 'express';
+import propertyRoutes from "./api/v1/routes/propertyRoutes.js";
 
 const app = express();
 
@@ -16,5 +17,6 @@ app.get("/",(req, res)=> {
 })
 import routes from "./app.js";
 app.use(routes); 
+app.use("/api/v1/property", propertyRoutes); 
 
 app.listen(PORT ,()=> console.log(`Server is running on PORT ${PORT}`))
