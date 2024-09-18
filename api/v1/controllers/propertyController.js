@@ -40,7 +40,7 @@ export const addProperty = async (req, res) => {
 
         
         return res.status(200).json({
-            message: "Property created successfully",
+            message: "Property added successfully",
             data: newProperty
         });
 
