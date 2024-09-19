@@ -3,7 +3,7 @@ import { addProperty,updateProperty,deleteProperty} from "../controllers/propert
 
 const router = Router();
 
-
+// routes
 router.post("/", addProperty);
 router.put("/:id", updateProperty);
 router.delete("/:id", deleteProperty);
