@@ -1,4 +1,3 @@
-
 import express from "express";
 import { PrismaClient } from "@prisma/client";
 import ratingRouter from './api/v1/routes/rating.js';
@@ -8,7 +7,7 @@ import routes from "./app.js";
 
 dotenv.config();
 
-const PORT = process.env.PORT || 3000; 
+const PORT = process.env.PORT || 3000;
 
 const prisma = new PrismaClient();
 
