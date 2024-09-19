@@ -1,7 +1,10 @@
+
 import express from "express";
 import { PrismaClient } from "@prisma/client";
 import ratingRouter from './api/v1/routes/rating.js'
+import propertyRoutes from "./api/v1/routes/propertyRoutes.js
 import dotenv from 'dotenv'
+import routes from "./app.js";
 
 dotenv.config();
 
@@ -16,11 +19,13 @@ app.use(express.json());
 
 // API Routes
 app.use('/api/v1/property-hive', ratingRouter);
+app.use("/api/v1/property", propertyRoutes); 
 
 async function main () {
     app.listen(PORT, () => {
         console.log(`server running on port ${PORT}`);
     });
+  app.use(routes);
 }
 
 main()
