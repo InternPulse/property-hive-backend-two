@@ -11,19 +11,19 @@ Doc link at
 
 Before setting up the project locally, ensure you have the following prerequisites installed:
 
-- [Go](https://go.dev) (>=1.22.3).
+- [Node.js](https://nodejs.org) (>=20.14.0).
 - A Database System (e.g., PostgreSQL, MySQL, SQLite)
 
 ### How to run API Locally
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/InternPulse/famtrust-backend-auth.git
+git clone https://github.com/InternPulse/property-hive-backend-two.git
 ```
 
 2. Change into the parent directory:
 ```bash
-cd famtrust-backend-auth
+cd property-hive-backend-two
 ```
 
 3. Set appropriate values for the following Compulsory Environment Variables:
@@ -32,14 +32,21 @@ cd famtrust-backend-auth
 POSTGRES_DSN=""
 # Secret key for signing JWTs
 JWTKEY=""
+# API Port
+PORT=5000
 ```
 
-3. Start the App:
+4. Install the App dependencies:
+``` bash
+npm install
+```
+
+5. Start the App:
 ```bash
-go run ./cmd/api
+npm run start-server
 ```
 
-The API should now be running locally at [http://localhost:8001/](http://localhost:8001/).
+The API should now be running locally at [http://localhost:5000/](http://localhost:5000/).
 
 
 # Commit Standards
@@ -51,12 +58,12 @@ The API should now be running locally at [http://localhost:8001/](http://localho
 
 ## Contributions
 
-famtrust-backend-auth is open to contributions, but I recommend creating an issue or replying in a comment to let us know what you are working on first that way we don't overwrite each other.
+property-hive-backend-two is open to contributions, but I recommend creating an issue or replying in a comment to let us know what you are working on first that way we don't overwrite each other.
 
 ## Contribution Guidelines
 
-1. Clone the repo `git clone https://github.com/InternPulse/famtrust-backend-auth.git`.
-2. Open your terminal & set the origin branch: `git remote add origin https://github.com/InternPulse/famtrust-backend-auth.git`
+1. Clone the repo `git clone https://github.com/InternPulse/property-hive-backend-two.git`.
+2. Open your terminal & set the origin branch: `git remote add origin https://github.com/InternPulse/property-hive-backend-two.git`
 3. Pull origin `git pull origin dev`
 4. Create a new branch for the task you were assigned to, eg `TicketNumber/(Feat/Bug/Fix/Chore)/Ticket-title` : `git checkout -b BA-001/Feat/Sign-Up-from`
 5. After making changes, do `git add .`
