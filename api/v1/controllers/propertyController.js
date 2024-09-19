@@ -1,27 +1,18 @@
 import prisma from "../../../DB/db.config.js";
 
-
-import { PrismaClient } from '@prisma/client';
-
-
-
-
 export const addProperty = async (req, res) => {
-    const { sellerID, location, price, status, description, squareMeters, propertyType, image } = req.body;
+    const { sellerID, location, price, description, squareMeters, propertyType, image } = req.body;
 
     try {
-        
-        if (!sellerID || !location || !price || !status || !squareMeters) {
-            return res.status(400).json({ message: "Missing required fields: sellerID, location, price, status, squareMeters" });
+        if (!sellerID || !location || !price || !squareMeters) {
+            return res.status(400).json({ message: "Missing required fields: sellerID, location, price, squareMeters" });
         }
 
-        
         const newProperty = await prisma.property.create({
             data: {
                 sellerID: Number(sellerID),
                 location: location,
                 price: Number(price),
-                status: status,
                 description: description || null,
                 squareMeters: Number(squareMeters),
                 propertyType: propertyType || null,
@@ -41,10 +32,9 @@ export const addProperty = async (req, res) => {
 
 export const updateProperty = async (req, res) => {
     const propertyId = req.params.id;
-    const { sellerID, location, price, status, description, squareMeters, propertyType, image } = req.body;
+    const { sellerID, location, price, description, squareMeters, propertyType, image } = req.body;
 
     try {
-        
         const findProperty = await prisma.property.findUnique({
             where: { id: Number(propertyId) }
         });
@@ -53,14 +43,12 @@ export const updateProperty = async (req, res) => {
             return res.status(404).json({ message: "Property not found" });
         }
 
-        // Update the property details
         const updatedProperty = await prisma.property.update({
             where: { id: Number(propertyId) },
             data: {
                 sellerID: sellerID ? Number(sellerID) : findProperty.sellerID,
                 location: location || findProperty.location,
                 price: price ? Number(price) : findProperty.price,
-                status: status || findProperty.status,
                 description: description || findProperty.description,
                 squareMeters: squareMeters ? Number(squareMeters) : findProperty.squareMeters,
                 propertyType: propertyType || findProperty.propertyType,
@@ -82,7 +70,6 @@ export const deleteProperty = async (req, res) => {
     const propertyId = req.params.id;
 
     try {
-        
         const findProperty = await prisma.property.findUnique({
             where: { id: Number(propertyId) }
         });
@@ -91,7 +78,6 @@ export const deleteProperty = async (req, res) => {
             return res.status(404).json({ message: "Property not found" });
         }
 
-        // Delete the property
         await prisma.property.delete({
             where: { id: Number(propertyId) }
         });
@@ -104,4 +90,5 @@ export const deleteProperty = async (req, res) => {
         return res.status(500).json({ message: "Server error", error: error.message });
     }
 };
+
 
