@@ -3,7 +3,6 @@ import { PrismaClient } from "@prisma/client";
 import ratingRouter from './api/v1/routes/rating.js';
 import propertyRoutes from "./api/v1/routes/propertyRoutes.js";
 import dotenv from 'dotenv';
-import routes from "./app.js";
 
 dotenv.config();
 
@@ -19,7 +18,6 @@ app.use(express.json());
 // API Routes
 app.use('/api/v1/property-hive', ratingRouter);
 app.use("/api/v1/property", propertyRoutes);
-app.use(routes); 
 
 async function main() {
     try {
@@ -35,4 +33,7 @@ async function main() {
 }
 
 main();
+
+export default app; // Export app for use in tests
+
 
