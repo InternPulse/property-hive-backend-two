@@ -1,6 +1,11 @@
-const express = require('express');
-const { PrismaClient } = require('@prisma/client');
-const { ratingRouter } = require('./api/v1/routes/rating');
+import express from "express";
+import { PrismaClient } from "@prisma/client";
+import ratingRouter from './api/v1/routes/rating.js'
+import dotenv from 'dotenv'
+
+dotenv.config();
+
+const PORT = process.env.PORT;
 
 const prisma = new PrismaClient()
 
@@ -9,24 +14,14 @@ const app = express();
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-
 // API Routes
 app.use('/api/v1/property-hive', ratingRouter);
 
-
-app.get('/*', (req, res) => {
-    res.status(404).json({
-        error: 'Not Found'
-    });
-});
-
 async function main () {
-    app.listen(5000, () => {
-        console.log('server running on port 5000');
+    app.listen(PORT, () => {
+        console.log(`server running on port ${PORT}`);
     });
 }
-
-
 
 main()
 .then(async () => {

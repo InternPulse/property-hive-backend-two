@@ -1,8 +1,5 @@
-// import { Router } from 'express';
-// import RatingController from '../controllers/rating';
-
-const { Router } = require('express');
-const { RatingController } = require('../controllers/rating');
+import { Router } from 'express';
+import RatingController from '../controllers/rating.js';
 
 const ratingRouter = Router();
 
@@ -16,7 +13,4 @@ ratingRouter.put('/properties/:propertyId/rate', (req, res) => {
     RatingController.updateRating(req, res);
 });
 
-module.exports = {
-    ratingRouter,
-};
-// export default ratingRouter;
+export default ratingRouter;
