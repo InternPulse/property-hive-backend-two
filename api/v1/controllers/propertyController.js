@@ -30,6 +30,80 @@ export const addProperty = async (req, res) => {
     }
 };
 
+export const getAllProperty = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+
+        const properties = await prisma.property.findMany({
+            skip: (page - 1) * limit,
+            take: parseInt(limit)
+        });
+
+        if(properties.length == 0) {
+            return res.status(404).json({
+                status: 404,
+                message: "No property has been listed"
+            });
+        }
+
+        return res.status(200).json({
+            status: 200,
+            message: "Property list retrieved Successfully",
+            propertyPerPage: `${properties.length} properties available`,
+            pageNumber: page,
+            limit: limit,
+            data: properties
+        });
+    } catch (error) {
+        return res.status(500).json({
+            status: 500,
+            message: error.message
+        });
+    }
+};
+
+export const getSingleProperty = async (req, res) => {
+    try {
+        const propertyId = req.params.propertyId
+
+        const property = await prisma.property.findUnique({
+            where: {
+                id: propertyId
+            },
+            include: {
+                Rating: {
+                    select: { id: true,
+                        rating: true,
+                        comment: true,
+                        user: {
+                            select: {id: true, firtName: true, lastname: true}
+                        }
+                    }
+                }
+            }
+        });
+
+        if(!property) {
+            return res.status(404).json({
+                status: 404,
+                message: "Property not found"
+            });
+        }
+
+        return res.status(200).json({
+            status: 200,
+            message: "Property retrieved Successfully",
+            data: property
+        });
+    } catch (error) {
+        return res.status(500).json({
+            status: 500,
+            message: error.message
+        });
+    }
+};
+
 export const updateProperty = async (req, res) => {
     const propertyId = req.params.id;
     const { sellerID, location, price, description, squareMeters, propertyType, image } = req.body;
