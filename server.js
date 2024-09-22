@@ -17,7 +17,7 @@ app.use(express.json());
 
 // API Routes
 app.use('/api/v1/property-hive', ratingRouter);
-app.use("/api/v1/property", propertyRoutes);
+app.use("/api/v1/property-hive", propertyRoutes);
 
 async function main() {
     try {
