@@ -45,7 +45,7 @@ describe('GET /properties/:propertyId/rate', function() {
       await axios.get(`${baseUrl}/properties/1/rate`);
     } catch (error) {
       expect(error.response.status).to.equal(404);
-      expect(error.response.data).to.have.property('message').that.equals('rating not found');
+      expect(error.response.data).to.have.property('message').that.equals('Rating not found');
     }
   });
 });
@@ -66,7 +66,7 @@ describe('PUT /properties/:propertyId/rate', function() {
   });
 
   it('should update a rating and return 200 when valid input is provided', async function() {
-    const ratingMock = { propertyId: 1, rating:4, comment: 'Updated comment' };
+    const ratingMock = { propertyId: 1, rating: 4, comment: 'Updated comment' };
 
     findFirstStub.returns(Promise.resolve(ratingMock));
     updateStub.returns(Promise.resolve(ratingMock));
@@ -106,6 +106,82 @@ describe('PUT /properties/:propertyId/rate', function() {
     }).catch(error => {
       expect(error.response.status).to.equal(400);
       expect(error.response).to.have.property('message').that.equals('rating value should be between 1 and 5');
+    })
+
+  });
+});
+
+// Test for POST /properties/:propertyId/rate
+describe('POST /properties/:propertyId/rate', function() {
+  let updateStub;
+  let findFirstStub;
+
+  beforeEach(function() {
+    findFirstStub = sinon.stub(prisma.rating, 'findFirst');
+    updateStub = sinon.stub(prisma.rating, 'update');
+  });
+
+  afterEach(function() {
+    findFirstStub.restore();
+    updateStub.restore();
+  });
+
+  it('should create a rating and return 200 when valid input is provided', async function() {
+    const ratingMock = { propertyId: 1, rating: 4, comment: 'new comment', userId: 1 };
+
+    findFirstStub.returns(Promise.resolve(ratingMock));
+    updateStub.returns(Promise.resolve(ratingMock));
+
+    axios.post(`${baseUrl}/properties/1/rate`, {
+      rating: 4,
+      comment: 'new comment',
+      userId: 1
+    })
+    .then(res => {
+      expect(res.status).to.equal(201);
+      expect(res.data).to.have.property('data');
+      expect(res.data.data).to.deep.equal(ratingMock);
+    })
+  });
+
+  it('should return 404 if rating does not exist', async function() {
+    findFirstStub.returns(Promise.resolve(null));
+
+    try {
+      await axios.post(`${baseUrl}/properties/1/rate`, {
+        rating: 4,
+        comment: 'Non-existent rating'
+      });
+    } catch (error) {
+      expect(error.response.status).to.equal(404);
+      expect(error.response.data).to.have.property('message').that.equals('Rating not found');
+    }
+  });
+
+  it('should return 400 if rating is out of range (1-5)', async function() {
+    axios.put(`${baseUrl}/properties/3/rate`, {
+      rating: 6,
+      comment: 'Out of rage rating'
+    })
+    .then(res => {
+      expect(res.status).to.equal(200);
+    }).catch(error => {
+      expect(error.response.status).to.equal(400);
+      expect(error.response).to.have.property('message').that.equals('Rating value should be between 1 and 5');
+    })
+
+  });
+
+  it('should return 400 if comment is empty string', async function() {
+    axios.put(`${baseUrl}/properties/1/rate`, {
+      rating: 3,
+      comment: ''
+    })
+    .then(res => {
+      expect(res.status).to.equal(200);
+    }).catch(error => {
+      expect(error.response.status).to.equal(400);
+      expect(error.response).to.have.property('message').that.equals('The provided fileds are not valid');
     })
 
   });

@@ -2,15 +2,10 @@
 // const { deleteDocument } = require('../controllers/documentController');
 
 import express from 'express';
-import { deleteDocument, getDocument, addDocument } from '../controllers/documentController';
+import { deleteDocument } from '../controllers/documentController.js';
 
 const documentRoutes = express.Router();
 
 documentRoutes.delete('/properties/:propertyId/documents', deleteDocument);
-
-documentRoutes.get('/properties/:propertyId/documents', getDocument);
-
-documentRoutes.post('/properties/:propertyId/documents', addDocument);
-
 
 export default documentRoutes;

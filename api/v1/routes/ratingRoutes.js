@@ -13,4 +13,9 @@ ratingRoutes.put('/properties/:propertyId/rate', (req, res) => {
     RatingController.updateRating(req, res);
 });
 
+// Authorization required.
+ratingRoutes.post('/properties/:propertyId/rate', (req, res) => {
+    RatingController.addRating(req, res);
+});
+
 export default ratingRoutes;
