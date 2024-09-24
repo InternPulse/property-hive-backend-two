@@ -1,7 +1,8 @@
-const { PrismaClient } = require('@prisma/client');
+import { PrismaClient } from "@prisma/client";
+
 const prisma = new PrismaClient();
 
-exports.deleteDocument = async (req, res) => {
+export const deleteDocument = async (req, res) => {
     const { propertyId } = req.params;
 
     try {

@@ -27,6 +27,12 @@ enum PropertyStatus {
   Sold
 }
 
+enum TransactionStatus {
+  success
+  failed
+  pending
+}
+
 // User Model
 model User {
   id String @id @default(uuid())
@@ -42,6 +48,7 @@ model User {
   updatedAt DateTime @updatedAt
   Rating Rating[]
   Property Property[]
+  Transactions Transactions[]
 
   @@map("users") // Table name at the database
 }
@@ -61,6 +68,8 @@ model Property  {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
   Rating Rating[]
+  PropertyDocuments PropertyDocuments[]  
+  Transactions Transactions[]
 
   @@map("properties") // Table name at the database
 }
@@ -78,4 +87,46 @@ model Rating {
   updatedAt DateTime @updatedAt
 
   @@map("ratings") // Table name at the database
+}
+
+
+model PropertyDocuments {
+  id String @id @default(uuid())
+  property Property @relation(fields: [propertyId], references: [id])
+  propertyId String
+  documentType String
+  filePath String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("propertyDocuments")
+}
+
+model Transactions {
+  id String @id @default(uuid())
+  user User @relation(fields: [userId], references: [id])
+  userId String
+  property Property @relation(fields: [propertyId], references: [id])
+  propertyId String
+  status TransactionStatus
+  paymentMethod String
+  totalAmount Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Invoice Invoice[]
+
+  @@map("transactions")
+}
+
+model Invoice {
+  id String @id @default(uuid())
+  transaction Transactions @relation(fields: [transactionId], references: [id])
+  transactionId String
+  issueDate DateTime
+  paymentStatus TransactionStatus
+  amount Float
+  dueDate DateTime
+  description String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

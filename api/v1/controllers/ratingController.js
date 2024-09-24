@@ -4,8 +4,9 @@ const prisma = new PrismaClient();
 
 class RatingController {
     /**
-     * @param {Request} req 
-     * @param {Response} res
+     * Retrieve ratings for specific property.
+     * @param {Request} req - Request Object
+     * @param {Response} res - Request Object
      * @return {Response} - return list of ratings for specific property with status code (200).
      * Success Responses:
      *      {
@@ -25,7 +26,8 @@ class RatingController {
             // Check if the property ratings exist at or not
             if (!(await prisma.rating.findFirst({ where: { propertyId } }))) {
                 return res.status(404).json({
-                    message: 'rating not found'
+                    statusCode: 404,
+                    message: 'Rating not found'
                 });
             }
 
@@ -38,18 +40,22 @@ class RatingController {
 
             // Return list of ratings.
             return res.status(200).json({
+                statusCode: 200,
                 data: ratings,
                 message: "Rating found successfully"
             });
         } catch(error) {
             // Return Internal Server Error (500).
             return res.status(500).json({
-                message: error.message
+                statusCode: 500,
+                message: "An error occurred",
+                error: error.message
             });
         }
     }
 
     /**
+     * Update rating data for specific property.
      * @param {Request} req  - Request Object
      * @param {Response} res - Response Object
      * @return {Response} - return the updated rating with status code (200).
@@ -77,6 +83,7 @@ class RatingController {
             // Check for input validation (rating, comment)
             if (typeof rating !== 'number' || typeof comment !== 'string') {
                 return res.status(400).json({
+                    statusCode: 400,
                     message: "The provided fileds are not valid"
                 });
             }
@@ -84,13 +91,15 @@ class RatingController {
             // Check if rating between 1 - 5
             if (!(rating <= 5 && rating >= 1)) {
                 return res.status(400).json({
-                    message: 'rating value should be between 1 and 5',
+                    statusCode: 400,
+                    message: 'Rating value should be between 1 and 5',
                 });
             }
 
             // Check if property rating exist or not
             if (!(await prisma.rating.findFirst({ where: { propertyId } }))) {
                 return res.status(404).json({
+                    statusCode: 404,
                     message: 'Rating not found'
                 });
             }
@@ -123,7 +132,78 @@ class RatingController {
             console.log(error.message)
             // Return Internal Server Error (500).
             return res.status(500).json({
-                message: error.message,
+                statusCode: 500,
+                message: "An error occurred",
+                error: error.message
+            });
+        }
+    }
+
+    /**
+     * Add rating to specific property 
+     * @param {Request} req - Request Object
+     * @param {Response} res - Response Object
+     * @return: - Return the new rating data
+     */
+    static async addRating(req, res) {
+        const { propertyId } = req.params;
+
+        const {
+            comment,
+            rating,
+            userId
+        } = req.body;
+
+        try {
+            // Check if the property exist at or not
+            if (!(await prisma.property.findFirst({ where: { id: propertyId } }))) {
+                return res.status(404).json({
+                    statusCode: 404,
+                    message: 'Rating not found'
+                });
+            }
+
+            // Check for input validation (rating, comment)
+            if (
+                typeof rating !== 'number' ||
+                typeof comment !== 'string' ||
+                typeof userId !== 'string' ||
+                comment.length <= 0
+            ) {
+                return res.status(400).json({
+                    statusCode: 400,
+                    message: "The provided fileds are not valid"
+                });
+            }
+
+            // Check if rating between 1 - 5
+            if (!(rating <= 5 && rating >= 1)) {
+                return res.status(400).json({
+                    statusCode: 400,
+                    message: 'Rating value should be between 1 and 5',
+                });
+            }
+
+            const propertyRating = await prisma.rating.create({
+                data: {
+                    rating,
+                    comment,
+                    propertyId,
+                    userId
+                }
+            });
+
+            return res.status(201).json({
+                statusCode: 201,
+                message: 'Rating created Successfully',
+                data: propertyRating
+            });
+
+        } catch(error) {
+            return res.status(500).json({
+                statusCode: 500,
+                message: 'An error occurred',
+                error: error.message
             });
         }
     }

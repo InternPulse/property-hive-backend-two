@@ -1,7 +1,8 @@
 import express from "express";
 import { PrismaClient } from "@prisma/client";
-import ratingRouter from './api/v1/routes/rating.js';
+import ratingRoutes from './api/v1/routes/ratingRoutes.js';
 import propertyRoutes from "./api/v1/routes/propertyRoutes.js";
+import documentRoutes from './api/v1/routes/documentRoutes.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -16,8 +17,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 // API Routes
-app.use('/api/v1/property-hive', ratingRouter);
+app.use('/api/v1/property-hive', ratingRoutes);
 app.use("/api/v1/property-hive", propertyRoutes);
+app.use("/api/v1/property-hive", documentRoutes);
 
 async function main() {
     try {
