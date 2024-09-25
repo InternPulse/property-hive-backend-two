@@ -1,24 +1,40 @@
 import prisma from "../../../DB/db.config.js";
 
 export const addProperty = async (req, res) => {
-    const { sellerID, location, price, description, squareMeters, propertyType, image } = req.body;
+    const { sellerId, name, state, city, address, price, description, squareMeters, propertyType, images } = req.body;
 
     try {
-        if (!sellerID || !location || !price || !squareMeters) {
-            return res.status(400).json({ message: "Missing required fields: sellerID, location, price, squareMeters" });
+        
+        if (!sellerId || !name || !state || !city || !address || !price || !squareMeters || !propertyType) {
+            return res.status(400).json({ message: "Missing required fields: sellerId, name, state, city, address, price, squareMeters, propertyType" });
         }
 
+        // Create the new property
         const newProperty = await prisma.property.create({
             data: {
-                sellerID: Number(sellerID),
-                location: location,
+                sellerId: Number(sellerId),
+                name,
+                state,
+                city,
+                address,
                 price: Number(price),
                 description: description || null,
                 squareMeters: Number(squareMeters),
-                propertyType: propertyType || null,
-                image: image || null
+                propertyType
             }
         });
+
+        
+        if (images && images.length > 0) {
+            const propertyImages = images.map(img => ({
+                propertyId: newProperty.id,
+                img
+            }));
+
+            await prisma.propertyImages.createMany({
+                data: propertyImages
+            });
+        }
 
         return res.status(200).json({
             message: "Property added successfully",
@@ -29,6 +45,7 @@ export const addProperty = async (req, res) => {
         return res.status(500).json({ message: "Server error", error: error.message });
     }
 };
+
 
 export const getAllProperty = async (req, res) => {
     try {
@@ -106,9 +123,10 @@ export const getSingleProperty = async (req, res) => {
 
 export const updateProperty = async (req, res) => {
     const propertyId = req.params.id;
-    const { sellerID, location, price, description, squareMeters, propertyType, image } = req.body;
+    const { sellerId, name, state, city, address, price, description, squareMeters, propertyType, images } = req.body;
 
     try {
+        
         const findProperty = await prisma.property.findUnique({
             where: { id: Number(propertyId) }
         });
@@ -117,18 +135,39 @@ export const updateProperty = async (req, res) => {
             return res.status(404).json({ message: "Property not found" });
         }
 
+        // Update the property details
         const updatedProperty = await prisma.property.update({
             where: { id: Number(propertyId) },
             data: {
-                sellerID: sellerID ? Number(sellerID) : findProperty.sellerID,
-                location: location || findProperty.location,
+                sellerId: sellerId ? Number(sellerId) : findProperty.sellerId,
+                name: name || findProperty.name,
+                state: state || findProperty.state,
+                city: city || findProperty.city,
+                address: address || findProperty.address,
                 price: price ? Number(price) : findProperty.price,
                 description: description || findProperty.description,
                 squareMeters: squareMeters ? Number(squareMeters) : findProperty.squareMeters,
-                propertyType: propertyType || findProperty.propertyType,
-                image: image || findProperty.image
+                propertyType: propertyType || findProperty.propertyType
             }
         });
+
+        // If new images are provided, update them in the PropertyImages model
+        if (images && images.length > 0) {
+            // First, delete the existing images for this property
+            await prisma.propertyImages.deleteMany({
+                where: { propertyId: Number(propertyId) }
+            });
+
+        
+            const propertyImages = images.map(img => ({
+                propertyId: updatedProperty.id,
+                img
+            }));
+
+            await prisma.propertyImages.createMany({
+                data: propertyImages
+            });
+        }
 
         return res.status(200).json({
             message: "Property updated successfully",
@@ -140,10 +179,12 @@ export const updateProperty = async (req, res) => {
     }
 };
 
+
 export const deleteProperty = async (req, res) => {
     const propertyId = req.params.id;
 
     try {
+        // Find the property by ID
         const findProperty = await prisma.property.findUnique({
             where: { id: Number(propertyId) }
         });
@@ -152,17 +193,39 @@ export const deleteProperty = async (req, res) => {
             return res.status(404).json({ message: "Property not found" });
         }
 
+        // Delete related PropertyImages
+        await prisma.propertyImages.deleteMany({
+            where: { propertyId: Number(propertyId) }
+        });
+
+        // Delete related PropertyDocuments
+        await prisma.propertyDocuments.deleteMany({
+            where: { propertyId: Number(propertyId) }
+        });
+
+        // Delete related SoldProperties (if any)
+        await prisma.soldproperties.deleteMany({
+            where: { propertyId: Number(propertyId) }
+        });
+
+        // Delete related Transactions (if any)
+        await prisma.transactions.deleteMany({
+            where: { propertyId: Number(propertyId) }
+        });
+
+        // Finally, delete the property itself
         await prisma.property.delete({
             where: { id: Number(propertyId) }
         });
 
         return res.status(200).json({
-            message: "Property deleted successfully"
+            message: "Property and its related data deleted successfully"
         });
 
     } catch (error) {
         return res.status(500).json({ message: "Server error", error: error.message });
     }
 };
+
 
 
