@@ -1,10 +1,3 @@
-
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,119 +7,171 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
-  Admin
-  Buyer
-  Seller
-  Agent
-}
-
-enum PropertyStatus {
-  ForSale
-  UnderContract
-  Sold
-}
-
-enum TransactionStatus {
-  success
-  failed
-  pending
-}
-
-// User Model
 model User {
-  id String @id @default(uuid())
-  firstName String
-  lastName String
-  businessName String
-  email String @unique
-  phoneNumber String
-  password String
-  role Role
-  profilePicture String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  Rating Rating[]
-  Property Property[]
-  Transactions Transactions[]
+  id             String    @id @default(uuid())
+  email          String    @unique
+  fname          String
+  lname          String
+  business_name  String    @unique
+  phone_number   String?   @unique
+  profile_picture String?
+  custom_url     String?
+  is_company     Boolean   @default(false)
+  is_active      Boolean   @default(true)
+  is_staff       Boolean   @default(false)
+  is_superuser   Boolean   @default(false)
+  date_joined    DateTime  @default(now())
+  last_login     DateTime?
+  updated_at     DateTime  @updatedAt
+  kycDocuments   KycDocuments[]
+  properties     Property[]
+  soldProperties SoldProperties[]
+  userProperties UserProperties[]
+  transactions   Transactions[]
+  ratings        Ratings[]
+  profile        Profile?
 
-  @@map("users") // Table name at the database
+  @@map("users")
 }
 
+model KycDocuments {
+  id            String    @id @default(uuid())
+  userid        User      @relation(fields: [userId], references: [id])
+  userId        String
+  document_type String?
+  document_file String?
+  status        String    @default("pending")
+  uploaded_at   DateTime  @default(now())
 
-// Property Model
-model Property  {
-  id String @id @default(uuid())
-  seller User @relation(fields: [sellerId], references: [id])
-  sellerId String
-  location String
-  description String
-  squaremeters Float
-  propertyStatus PropertyStatus
-  propertyType String
-  price Float
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
-  Rating Rating[]
-  PropertyDocuments PropertyDocuments[]  
-  Transactions Transactions[]
-
-  @@map("properties") // Table name at the database
+  @@map("kyc_documents")
 }
 
-// Rating Model
-model Rating {
-  id String @id @default(uuid())
-  rating Int
-  comment String
-  property Property @relation(fields: [propertyId], references: [id])
-  propertyId String
-  user User @relation(fields: [userId], references: [id])
-  userId String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model Property {
+  id            Int             @id @default(autoincrement())
+  seller        User            @relation(fields: [sellerId], references: [id])
+  sellerId      String
+  name          String
+  state         String
+  city          String
+  address       String
+  description   String
+  squaremeters  String
+  property_type String
+  price         Int
+  is_sold       Boolean         @default(false)
+  date_sold     DateTime?
+  created_at    DateTime        @default(now())
+  updated_at    DateTime        @updatedAt
+  propertyImages PropertyImages[]
+  propertyDocuments PropertyDocuments[]
+  soldProperties SoldProperties[]
+  userProperties UserProperties[]
+  transactions  Transactions[]
+  ratings       Ratings[]
 
-  @@map("ratings") // Table name at the database
+  @@map("properties")
 }
 
+model PropertyImages {
+  id          String   @id @default(uuid())
+  property    Property  @relation(fields: [propertyId], references: [id])
+  propertyId  Int
+  img         String?
+
+  @@map("property_images")
+}
 
 model PropertyDocuments {
-  id String @id @default(uuid())
-  property Property @relation(fields: [propertyId], references: [id])
-  propertyId String
-  documentType String
-  filePath String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(uuid())
+  property    Property  @relation(fields: [propertyId], references: [id])
+  propertyId  Int
+  document_type String?
+  img         String?
+  file_path   String?
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
 
-  @@map("propertyDocuments")
+  @@map("property_documents")
+}
+
+model SoldProperties {
+  id          String   @id @default(uuid())
+  buyer       User     @relation(fields: [buyerId], references: [id])
+  buyerId     String
+  property    Property  @relation(fields: [propertyId], references: [id])
+  propertyId  Int
+  date_sold   DateTime  @default(now())
+
+  @@map("sold_properties")
+}
+
+model UserProperties {
+  id          String   @id @default(uuid())
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+  property    Property  @relation(fields: [propertyId], references: [id])
+  propertyId  Int
+  date_purchased DateTime @default(now())
+
+  @@map("user_properties")
 }
 
 model Transactions {
-  id String @id @default(uuid())
-  user User @relation(fields: [userId], references: [id])
-  userId String
-  property Property @relation(fields: [propertyId], references: [id])
-  propertyId String
-  status TransactionStatus
-  paymentMethod String
-  totalAmount Float
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  Invoice Invoice[]
+  id          String   @id @default(uuid())
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+  property    Property  @relation(fields: [propertyId], references: [id])
+  propertyId  Int
+  status      String    @default("P") // "P" for Pending, "A" for Approved, "F" for Failed
+  payment_method String
+  total_amount Int
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  invoices    Invoice[]
 
   @@map("transactions")
 }
 
 model Invoice {
-  id String @id @default(uuid())
+  id          String   @id @default(uuid())
   transaction Transactions @relation(fields: [transactionId], references: [id])
   transactionId String
-  issueDate DateTime
-  paymentStatus TransactionStatus
-  amount Float
-  dueDate DateTime
-  description String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  payment_status String
+  payment_method String
+  note         String?
+  issue_date   DateTime  @default(now())
+
+  @@map("invoices")
 }
+
+model Ratings {
+  id          String   @id @default(uuid())
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+  property    Property  @relation(fields: [propertyId], references: [id])
+  propertyId  Int
+  comment     String?
+  rate        Int       @default(1)
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+
+  @@map("ratings")
+}
+
+model Profile {
+  id             String   @id @default(uuid())
+  user           User     @relation(fields: [userId], references: [id])
+  userId         String   @unique
+  company_logo   String?
+  company_banner String?
+  company_address String?
+  title          String?
+  description    String
+  instagram      String?
+  linkedin       String?
+  facebook       String?
+  twitter        String?
+
+  @@map("profiles")
+}
+
