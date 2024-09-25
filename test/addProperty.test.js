@@ -18,7 +18,7 @@ describe('POST /api/property', () => {
         city: 'Test City',
         address: '123 Test Address',
         price: 100000,
-        squareMeters: 50,
+        squaremeters: 50,
         propertyType: 'House',
         images: ['http://example.com/image1.jpg', 'http://example.com/image2.jpg'] // Example images
       });
