@@ -49,15 +49,35 @@ export const addProperty = async (req, res) => {
 
 export const getAllProperty = async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
+        const page = Math.max(1, parseInt(req.query.page)) || 1; // Ensure page is at least 1
+        const limit = Math.max(1, parseInt(req.query.limit)) || 10; // Ensure limit is at least 1
 
-        const properties = await prisma.property.findMany({
-            skip: (page - 1) * limit,
-            take: parseInt(limit)
-        });
+        const [properties, totalCount] = await Promise.all([
+            prisma.property.findMany({
+                skip: (page - 1) * limit,
+                take: limit,
+                include: {
+                    seller: {
+                        select: {
+                            id: true,
+                            email: true,
+                            fname: true,
+                            lname: true,
+                            business_name: true,
+                        }
+                    },
+                    propertyImages: {
+                        select: {
+                            id: true,
+                            img: true,
+                        }
+                    }
+                }
+            }),
+            prisma.property.count() // Get total count of properties
+        ]);
 
-        if(properties.length == 0) {
+        if (properties.length === 0) {
             return res.status(404).json({
                 status: 404,
                 message: "No property has been listed"
@@ -66,8 +86,9 @@ export const getAllProperty = async (req, res) => {
 
         return res.status(200).json({
             status: 200,
-            message: "Property list retrieved Successfully",
-            propertyPerPage: `${properties.length} properties available`,
+            message: "Property list retrieved successfully",
+            propertyPerPage: properties.length,
+            totalCount, // Include total count
             pageNumber: page,
             limit: limit,
             data: properties
@@ -80,28 +101,49 @@ export const getAllProperty = async (req, res) => {
     }
 };
 
+
 export const getSingleProperty = async (req, res) => {
     try {
-        const propertyId = req.params.propertyId
+        const propertyId = parseInt(req.params.propertyId); // Ensure the propertyId is an integer
 
         const property = await prisma.property.findUnique({
             where: {
                 id: propertyId
             },
             include: {
-                Rating: {
-                    select: { id: true,
-                        rating: true,
+                seller: { 
+                    select: {
+                        id: true,
+                        email: true,
+                        fname: true,
+                        lname: true,
+                        business_name: true
+                    }
+                },
+                ratings: {
+                    select: {
+                        id: true,
+                        rate: true, 
                         comment: true,
                         user: {
-                            select: {id: true, firtName: true, lastname: true}
+                            select: {
+                                id: true,
+                                fname: true, 
+                                lname: true 
+                            }
                         }
+                    }
+                },
+                propertyImages: {
+                    select: {
+                        id: true,
+                        img: true
                     }
                 }
             }
         });
 
-        if(!property) {
+        if (!property) {
             return res.status(404).json({
                 status: 404,
                 message: "Property not found"
@@ -110,7 +152,7 @@ export const getSingleProperty = async (req, res) => {
 
         return res.status(200).json({
             status: 200,
-            message: "Property retrieved Successfully",
+            message: "Property retrieved successfully",
             data: property
         });
     } catch (error) {
