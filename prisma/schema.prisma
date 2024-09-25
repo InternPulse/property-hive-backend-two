@@ -9,19 +9,19 @@ datasource db {
 model User {
   id               String         @id @default(uuid())
   email            String         @unique
-  firstName        String         @map("fname") // Renamed for clarity
-  lastName         String         @map("lname") // Renamed for clarity
-  businessName     String         @unique @map("business_name") // Using camelCase for consistency
-  phoneNumber      String?        @unique @map("phone_number") // Using camelCase for consistency
-  profilePicture    String?       @map("profile_picture") // Using camelCase for consistency
-  customUrl        String?        @map("custom_url") // Using camelCase for consistency
-  isCompany        Boolean        @default(false) @map("is_company") // Using camelCase for consistency
-  isActive         Boolean        @default(true) @map("is_active") // Using camelCase for consistency
-  isStaff          Boolean        @default(false) @map("is_staff") // Using camelCase for consistency
-  isSuperuser      Boolean        @default(false) @map("is_superuser") // Using camelCase for consistency
-  dateJoined       DateTime       @default(now()) @map("date_joined") // Using camelCase for consistency
-  lastLogin        DateTime?      @map("last_login") // Using camelCase for consistency
-  updatedAt        DateTime       @updatedAt @map("updated_at") // Using camelCase for consistency
+  firstName        String         @map("fname") 
+  lastName         String         @map("lname") 
+  businessName     String         @unique @map("business_name") 
+  phoneNumber      String?        @unique @map("phone_number") 
+  profilePicture    String?       @map("profile_picture") 
+  customUrl        String?        @map("custom_url") 
+  isCompany        Boolean        @default(false) @map("is_company") 
+  isActive         Boolean        @default(true) @map("is_active") 
+  isStaff          Boolean        @default(false) @map("is_staff") 
+  isSuperuser      Boolean        @default(false) @map("is_superuser") 
+  dateJoined       DateTime       @default(now()) @map("date_joined") 
+  lastLogin        DateTime?      @map("last_login") 
+  updatedAt        DateTime       @updatedAt @map("updated_at") 
   kycDocuments     KycDocuments[] 
   properties       Property[]
   soldProperties    SoldProperties[]
