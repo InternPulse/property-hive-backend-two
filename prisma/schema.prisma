@@ -7,31 +7,32 @@ datasource db {
   url      = env("POSTGRES_DSN")
 }
 model User {
-  id             String    @id @default(uuid())
-  email          String    @unique
-  fname          String
-  lname          String
-  business_name  String    @unique
-  phone_number   String?   @unique
-  profile_picture String?
-  custom_url     String?
-  is_company     Boolean   @default(false)
-  is_active      Boolean   @default(true)
-  is_staff       Boolean   @default(false)
-  is_superuser   Boolean   @default(false)
-  date_joined    DateTime  @default(now())
-  last_login     DateTime?
-  updated_at     DateTime  @updatedAt
-  kycDocuments   KycDocuments[]
-  properties     Property[]
-  soldProperties SoldProperties[]
-  userProperties UserProperties[]
-  transactions   Transactions[]
-  ratings        Ratings[]
-  profile        Profile?
+  id               String         @id @default(uuid())
+  email            String         @unique
+  firstName        String         @map("fname") 
+  lastName         String         @map("lname") 
+  businessName     String         @unique @map("business_name") 
+  phoneNumber      String?        @unique @map("phone_number") 
+  profilePicture    String?       @map("profile_picture") 
+  customUrl        String?        @map("custom_url") 
+  isCompany        Boolean        @default(false) @map("is_company") 
+  isActive         Boolean        @default(true) @map("is_active") 
+  isStaff          Boolean        @default(false) @map("is_staff") 
+  isSuperuser      Boolean        @default(false) @map("is_superuser") 
+  dateJoined       DateTime       @default(now()) @map("date_joined") 
+  lastLogin        DateTime?      @map("last_login") 
+  updatedAt        DateTime       @updatedAt @map("updated_at") 
+  kycDocuments     KycDocuments[] 
+  properties       Property[]
+  soldProperties    SoldProperties[]
+  userProperties   UserProperties[]
+  transactions     Transactions[]
+  ratings          Ratings[]
+  profile          Profile?
 
   @@map("users")
 }
+
 
 model KycDocuments {
   id            String    @id @default(uuid())
@@ -46,30 +47,31 @@ model KycDocuments {
 }
 
 model Property {
-  id            Int             @id @default(autoincrement())
-  seller        User            @relation(fields: [sellerId], references: [id])
-  sellerId      String
-  name          String
-  state         String
-  city          String
-  address       String
-  description   String
-  squaremeters  String
-  property_type String
-  price         Int
-  is_sold       Boolean         @default(false)
-  date_sold     DateTime?
-  created_at    DateTime        @default(now())
-  updated_at    DateTime        @updatedAt
-  propertyImages PropertyImages[]
+  id                Int             @id @default(autoincrement())
+  seller            User            @relation(fields: [sellerId], references: [id])
+  sellerId          String
+  name              String
+  state             String
+  city              String
+  address           String
+  description       String
+  squaremeters      String         
+  property_type     String
+  price             Int
+  is_sold           Boolean         @default(false)
+  date_sold         DateTime?
+  created_at        DateTime        @default(now())
+  updated_at        DateTime        @updatedAt
+  propertyImages    PropertyImages[]
   propertyDocuments PropertyDocuments[]
-  soldProperties SoldProperties[]
-  userProperties UserProperties[]
-  transactions  Transactions[]
-  ratings       Ratings[]
+  soldProperties    SoldProperties[]
+  userProperties    UserProperties[]
+  transactions      Transactions[]
+  ratings           Ratings[]
 
   @@map("properties")
 }
+
 
 model PropertyImages {
   id          String   @id @default(uuid())

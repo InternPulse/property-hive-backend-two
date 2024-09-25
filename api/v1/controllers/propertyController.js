@@ -1,30 +1,37 @@
 import prisma from "../../../DB/db.config.js";
 
 export const addProperty = async (req, res) => {
-    const { sellerId, name, state, city, address, price, description, squareMeters, propertyType, images } = req.body;
+    const { sellerId, name, state, city, address, price, description, squaremeters, propertyType, images } = req.body;
 
     try {
-        
-        if (!sellerId || !name || !state || !city || !address || !price || !squareMeters || !propertyType) {
-            return res.status(400).json({ message: "Missing required fields: sellerId, name, state, city, address, price, squareMeters, propertyType" });
+        // Check if the sellerId exists in the User table
+        const sellerExists = await prisma.user.findUnique({
+            where: { id: sellerId }
+        });
+
+        if (!sellerExists) {
+            return res.status(400).json({ message: "Invalid sellerId: User does not exist" });
+        }
+
+        if (!name || !state || !city || !address || !price || !squaremeters || !propertyType) {
+            return res.status(400).json({ message: "Missing required fields: sellerId, name, state, city, address, price, squaremeters, propertyType" });
         }
 
         // Create the new property
         const newProperty = await prisma.property.create({
             data: {
-                sellerId: Number(sellerId),
+                sellerId: String(sellerId), // Ensure sellerId is a string
                 name,
                 state,
                 city,
                 address,
                 price: Number(price),
                 description: description || null,
-                squareMeters: Number(squareMeters),
-                propertyType
+                squaremeters: String(squaremeters), // Ensure squaremeters is a string
+                property_type: propertyType // Map propertyType to property_type
             }
         });
 
-        
         if (images && images.length > 0) {
             const propertyImages = images.map(img => ({
                 propertyId: newProperty.id,
@@ -46,11 +53,10 @@ export const addProperty = async (req, res) => {
     }
 };
 
-
 export const getAllProperty = async (req, res) => {
     try {
-        const page = Math.max(1, parseInt(req.query.page)) || 1; // Ensure page is at least 1
-        const limit = Math.max(1, parseInt(req.query.limit)) || 10; // Ensure limit is at least 1
+        const page = Math.max(1, parseInt(req.query.page)) || 1; 
+        const limit = Math.max(1, parseInt(req.query.limit)) || 10; 
 
         const [properties, totalCount] = await Promise.all([
             prisma.property.findMany({
@@ -84,19 +90,21 @@ export const getAllProperty = async (req, res) => {
             });
         }
 
+        // Send successful response
         return res.status(200).json({
             status: 200,
-            message: "Property list retrieved successfully",
-            propertyPerPage: properties.length,
-            totalCount, // Include total count
-            pageNumber: page,
-            limit: limit,
-            data: properties
+            totalCount,
+            page,
+            limit,
+            properties
         });
+
     } catch (error) {
+        console.error("Error fetching properties:", error);
         return res.status(500).json({
             status: 500,
-            message: error.message
+            message: "Internal server error",
+            error: error.message
         });
     }
 };
@@ -204,19 +212,20 @@ export const getSingleProperty = async (req, res) => {
             data: property
         });
     } catch (error) {
+        console.error("Error retrieving property:", error); // Log the error
         return res.status(500).json({
             status: 500,
-            message: error.message
+            message: "Internal server error", // More user-friendly message
+            error: error.message
         });
     }
 };
 
 export const updateProperty = async (req, res) => {
     const propertyId = req.params.id;
-    const { sellerId, name, state, city, address, price, description, squareMeters, propertyType, images } = req.body;
+    const { sellerId, name, state, city, address, price, description, squaremeters, propertyType, images } = req.body;
 
     try {
-        
         const findProperty = await prisma.property.findUnique({
             where: { id: Number(propertyId) }
         });
@@ -229,15 +238,15 @@ export const updateProperty = async (req, res) => {
         const updatedProperty = await prisma.property.update({
             where: { id: Number(propertyId) },
             data: {
-                sellerId: sellerId ? Number(sellerId) : findProperty.sellerId,
+                sellerId: sellerId ? String(sellerId) : findProperty.sellerId, // Ensure sellerId is String
                 name: name || findProperty.name,
                 state: state || findProperty.state,
                 city: city || findProperty.city,
                 address: address || findProperty.address,
                 price: price ? Number(price) : findProperty.price,
                 description: description || findProperty.description,
-                squareMeters: squareMeters ? Number(squareMeters) : findProperty.squareMeters,
-                propertyType: propertyType || findProperty.propertyType
+                squaremeters: squaremeters ? Number(squaremeters) : findProperty.squaremeters, // Use lowercase 'squaremeters'
+                propertyType: propertyType || findProperty.property_type // Ensure propertyType matches your schema
             }
         });
 
@@ -248,7 +257,6 @@ export const updateProperty = async (req, res) => {
                 where: { propertyId: Number(propertyId) }
             });
 
-        
             const propertyImages = images.map(img => ({
                 propertyId: updatedProperty.id,
                 img
@@ -265,10 +273,10 @@ export const updateProperty = async (req, res) => {
         });
 
     } catch (error) {
+        console.error("Error updating property:", error); // Log the error for debugging
         return res.status(500).json({ message: "Server error", error: error.message });
     }
 };
-
 
 export const deleteProperty = async (req, res) => {
     const propertyId = req.params.id;
@@ -309,13 +317,18 @@ export const deleteProperty = async (req, res) => {
         });
 
         return res.status(200).json({
-            message: "Property and its related data deleted successfully"
+            message: "Property and its related data deleted successfully",
+            deletedProperty: findProperty // Optionally include deleted property details
         });
 
     } catch (error) {
+        console.error("Error deleting property:", error); // Log the error for debugging
         return res.status(500).json({ message: "Server error", error: error.message });
     }
 };
+
+
+
 
 
 
