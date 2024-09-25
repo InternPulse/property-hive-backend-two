@@ -24,7 +24,7 @@ class RatingController {
             const { propertyId } = req.params;
 
             // Check if the property ratings exist at or not
-            if (!(await prisma.rating.findFirst({ where: { propertyId } }))) {
+            if (!(await prisma.ratings.findFirst({ where: { propertyId: Number(propertyId) } }))) {
                 return res.status(404).json({
                     statusCode: 404,
                     message: 'Rating not found'
@@ -32,9 +32,9 @@ class RatingController {
             }
 
             // Get all ratings for specific property.
-            const ratings = await prisma.rating.findMany({
+            const ratings = await prisma.ratings.findMany({
                 where: {
-                    propertyId,
+                    propertyId: Number(propertyId),
                 }
             });
 
@@ -97,7 +97,7 @@ class RatingController {
             }
 
             // Check if property rating exist or not
-            if (!(await prisma.rating.findFirst({ where: { propertyId } }))) {
+            if (!(await prisma.ratings.findFirst({ where: { propertyId: Number(propertyId) } }))) {
                 return res.status(404).json({
                     statusCode: 404,
                     message: 'Rating not found'
@@ -105,16 +105,16 @@ class RatingController {
             }
 
             // Get rating Id
-            const ratingId = await prisma.rating.findFirst({
+            const ratingId = await prisma.ratings.findFirst({
                 where: {
-                    propertyId
+                    propertyId: Number(propertyId)
                 }
             });
 
             // Update property rating
-            const updatedRating = await prisma.rating.update({
+            const updatedRating = await prisma.ratings.update({
                 where: {
-                    id: ratingId.id
+                    id: Number(ratingId.id)
                 },
                 data: {
                     rating,
@@ -156,7 +156,7 @@ class RatingController {
 
         try {
             // Check if the property exist at or not
-            if (!(await prisma.property.findFirst({ where: { id: propertyId } }))) {
+            if (!(await prisma.property.findFirst({ where: { id: Number(propertyId) } }))) {
                 return res.status(404).json({
                     statusCode: 404,
                     message: 'Rating not found'
@@ -167,7 +167,6 @@ class RatingController {
             if (
                 typeof rating !== 'number' ||
                 typeof comment !== 'string' ||
-                typeof userId !== 'string' ||
                 comment.length <= 0
             ) {
                 return res.status(400).json({
@@ -184,7 +183,7 @@ class RatingController {
                 });
             }
 
-            const propertyRating = await prisma.rating.create({
+            const propertyRating = await prisma.ratings.create({
                 data: {
                     rating,
                     comment,
