@@ -4,9 +4,8 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = env("POSTGRES_DSN")
 }
-
 model User {
   id             String    @id @default(uuid())
   email          String    @unique
