@@ -101,6 +101,54 @@ export const getAllProperty = async (req, res) => {
     }
 };
 
+export const searchAndFilter = async (req, res) => {
+    try {
+      const {state, city, property_type, minPrice, maxPrice, squaremeters, searchTerm} = req.query;
+
+      const searchFilters = {
+        // properties are to meet conditions of specified filters in AND condition to be displayed
+        AND: [
+            state ? {state: {contains: state, mode: 'insensitive'}} : undefined,
+            city ? {city: {contains: city, mode: 'insensitive'}} : undefined,
+            property_type ? {property_type: {contains: property_type, mode: 'insensitive'}} : undefined,
+            squaremeters ? {squaremeters: {contains: squareMeters, mode: 'insensitive'}} : undefined,
+            minPrice || maxPrice ? {
+                price: {
+                    ...(minPrice ? {gte: Number(minPrice)} : {}),
+                    ...(maxPrice ? {lte: Number(maxPrice)} : {}),
+                }
+            } : undefined,
+            //If search input contains any keyword that happens to appear in the name, description or address, 
+            //then the "searchTerm" will ensure it(the property) is displayed
+            searchTerm ? {
+                //property doesn't have to meet all conditions
+                OR: [
+                    {name: {contains: searchTerm, mode: 'insensitive'}},
+                    {description: {contains: searchTerm, mode: 'insensitive'}},
+                    {address: {contains: searchTerm, mode: 'insensitive'}}
+                ]
+            } : undefined,
+        ].filter(Boolean) // removes any undefined values from the AND array
+      }
+      const properties = await prisma.property.findMany({
+        where: {
+            ...searchFilters
+        }
+      });
+  
+      return res.status(200).json({
+        status: 200,
+        message: 'Search retrieved successfully',
+        data: properties,
+      });
+    } catch (error) {
+      res.status(500).json({
+        status: 500,
+        message: 'Error searching properties',
+        error: error.message
+      });
+    }
+  };
 
 export const getSingleProperty = async (req, res) => {
     try {
