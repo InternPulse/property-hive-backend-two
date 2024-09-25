@@ -4,6 +4,7 @@ import ratingRoutes from './api/v1/routes/ratingRoutes.js';
 import propertyRoutes from "./api/v1/routes/propertyRoutes.js";
 import documentRoutes from './api/v1/routes/documentRoutes.js';
 import dotenv from 'dotenv';
+import cors from 'cors';
 
 dotenv.config();
 
@@ -13,13 +14,14 @@ const prisma = new PrismaClient();
 
 const app = express();
 
+app.use(cors());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 // API Routes
 app.use('/api/v1/property-hive', ratingRoutes);
 app.use("/api/v1/property-hive", propertyRoutes);
-app.use("/api/v1/properties", documentRoutes);
+app.use("/api/v1/property-hive", documentRoutes);
 
 async function main() {
     try {
