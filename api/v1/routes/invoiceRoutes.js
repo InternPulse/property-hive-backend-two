@@ -1,7 +1,9 @@
-const express = require('express');
-const { getInvoices } = require('../controllers/invoiceController');
-const router = express.Router();
+import express from'express';
+import { getInvoices } from '../controllers/invoiceController.js';
 
-router.get('/properties/:propertyId/invoices', getInvoices);
+const invoiceRouter = express.Router();
 
-module.exports = router;
+
+invoiceRouter.get('/properties/:propertyId/invoices', getInvoices);
+
+export default invoiceRouter;

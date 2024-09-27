@@ -3,6 +3,7 @@ import { PrismaClient } from "@prisma/client";
 import ratingRoutes from './api/v1/routes/ratingRoutes.js';
 import propertyRoutes from "./api/v1/routes/propertyRoutes.js";
 import documentRoutes from './api/v1/routes/documentRoutes.js';
+import invoiceRouter from "./api/v1/routes/invoiceRoutes.js";
 import dotenv from 'dotenv';
 import cors from 'cors';
 
@@ -22,6 +23,8 @@ app.use(express.json());
 app.use('/api/v1/property-hive', ratingRoutes);
 app.use("/api/v1/property-hive", propertyRoutes);
 app.use("/api/v1/property-hive", documentRoutes);
+app.use("/api/v1/property-hive", invoiceRouter);
+
 
 async function main() {
     try {
