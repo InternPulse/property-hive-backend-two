@@ -20,7 +20,7 @@ export const addProperty = async (req, res) => {
         // Create the new property
         const newProperty = await prisma.property.create({
             data: {
-                sellerId: String(sellerId), // Ensure sellerId is a string
+                sellerId: Number(sellerId), // Ensure sellerId is a string
                 name,
                 state,
                 city,
@@ -49,6 +49,7 @@ export const addProperty = async (req, res) => {
         });
 
     } catch (error) {
+        console.log(error.message)
         return res.status(500).json({ message: "Server error", error: error.message });
     }
 };
@@ -67,9 +68,9 @@ export const getAllProperty = async (req, res) => {
                         select: {
                             id: true,
                             email: true,
-                            fname: true,
-                            lname: true,
-                            business_name: true,
+                            firstName: true,
+                            lastName: true,
+                            businessName: true,
                         }
                     },
                     propertyImages: {
@@ -119,7 +120,7 @@ export const searchAndFilter = async (req, res) => {
             state ? {state: {contains: state, mode: 'insensitive'}} : undefined,
             city ? {city: {contains: city, mode: 'insensitive'}} : undefined,
             property_type ? {property_type: {contains: property_type, mode: 'insensitive'}} : undefined,
-            squaremeters ? {squaremeters: {contains: squareMeters, mode: 'insensitive'}} : undefined,
+            squaremeters ? {squaremeters: {contains: squaremeters, mode: 'insensitive'}} : undefined,
             minPrice || maxPrice ? {
                 price: {
                     ...(minPrice ? {gte: Number(minPrice)} : {}),
@@ -164,16 +165,16 @@ export const getSingleProperty = async (req, res) => {
 
         const property = await prisma.property.findUnique({
             where: {
-                id: propertyId
+                id: Number(propertyId)
             },
             include: {
                 seller: { 
                     select: {
                         id: true,
                         email: true,
-                        fname: true,
-                        lname: true,
-                        business_name: true
+                        firstName: true,
+                        lastName: true,
+                        businessName: true
                     }
                 },
                 ratings: {
@@ -184,8 +185,8 @@ export const getSingleProperty = async (req, res) => {
                         user: {
                             select: {
                                 id: true,
-                                fname: true, 
-                                lname: true 
+                                firstName: true, 
+                                lastName: true 
                             }
                         }
                     }
@@ -238,7 +239,7 @@ export const updateProperty = async (req, res) => {
         const updatedProperty = await prisma.property.update({
             where: { id: Number(propertyId) },
             data: {
-                sellerId: sellerId ? String(sellerId) : findProperty.sellerId, // Ensure sellerId is String
+                sellerId: sellerId ? Number(sellerId) : findProperty.sellerId, // Ensure sellerId is String
                 name: name || findProperty.name,
                 state: state || findProperty.state,
                 city: city || findProperty.city,
@@ -246,7 +247,7 @@ export const updateProperty = async (req, res) => {
                 price: price ? Number(price) : findProperty.price,
                 description: description || findProperty.description,
                 squaremeters: squaremeters ? Number(squaremeters) : findProperty.squaremeters, // Use lowercase 'squaremeters'
-                propertyType: propertyType || findProperty.property_type // Ensure propertyType matches your schema
+                property_type: propertyType || findProperty.property_type // Ensure propertyType matches your schema
             }
         });
 
@@ -256,7 +257,7 @@ export const updateProperty = async (req, res) => {
             await prisma.propertyImages.deleteMany({
                 where: { propertyId: Number(propertyId) }
             });
-
+            
             const propertyImages = images.map(img => ({
                 propertyId: updatedProperty.id,
                 img
@@ -302,7 +303,7 @@ export const deleteProperty = async (req, res) => {
         });
 
         // Delete related SoldProperties (if any)
-        await prisma.soldproperties.deleteMany({
+        await prisma.soldProperties.deleteMany({
             where: { propertyId: Number(propertyId) }
         });
 
