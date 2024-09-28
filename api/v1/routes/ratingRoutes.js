@@ -9,12 +9,12 @@ ratingRoutes.get('/properties/:propertyId/rate', (req, res) => {
 });
 
 // Authorization required.
-ratingRoutes.put('/properties/:propertyId/rate', (req, res) => {
+ratingRoutes.put('/properties/:propertyId/rate/:rateId', (req, res) => {
     RatingController.updateRating(req, res);
 });
 
 // Authorization required.
-ratingRoutes.post('/properties/:propertyId/rate', (req, res) => {
+ratingRoutes.post('/properties/:propertyId/rate/', (req, res) => {
     RatingController.addRating(req, res);
 });
 

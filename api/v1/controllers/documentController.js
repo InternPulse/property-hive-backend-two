@@ -7,6 +7,9 @@ export const deleteDocument = async (req, res) => {
     const { propertyId } = req.params;
 
     try {
+<<<<<<< HEAD
+        let propertyDocument = await prisma.common_propertydocuments.findFirst({
+=======
         let propertyDocument = await prisma.propertyDocuments.findFirst({
             where: {
                 propertyId: Number(propertyId)
@@ -21,8 +24,22 @@ export const deleteDocument = async (req, res) => {
         }
 
         await prisma.propertyDocuments.deleteMany({
+>>>>>>> 51cac09ee2a10cb44d69f3244da61cb02919c7ce
             where: {
-                propertyId: parseInt(propertyId),
+                propertyid_id: Number(propertyId)
+            }
+        })
+
+        if (!propertyDocument) {
+            return res.status(404).json({
+                statusCode: 404,
+                message: "Property Document Not Found",
+            });
+        }
+
+        await prisma.common_propertydocuments.deleteMany({
+            where: {
+                propertyid_id: Number(propertyId),
             },
         });
 
@@ -34,13 +51,20 @@ export const deleteDocument = async (req, res) => {
             console.log('File Deleted Successfully');
         });
 
+<<<<<<< HEAD
+        propertyDocument.id = Number(propertyDocument.id)
+        propertyDocument.propertyid_id = Number(propertyDocument.propertyid_id);
+
+        return res.status(200).json({
+=======
         res.status(200).json({
+>>>>>>> 51cac09ee2a10cb44d69f3244da61cb02919c7ce
             statusCode: 200,
             message: 'Document(s) deleted successfully',
             data: [],
         });
     } catch (error) {
-        res.status(500).json({
+        return res.status(500).json({
             statusCode: 500,
             message: 'An error occurred',
             error: error.message,
@@ -65,7 +89,7 @@ export const addDocument = async (req, res) => {
         const documentFile = req.file;
         
         // Check if property document exist or not.
-        if (!(await prisma.property.findFirst({
+        if (!(await prisma.common_property.findFirst({
             where: {
                 id: Number(propertyId),
             }
@@ -98,13 +122,16 @@ export const addDocument = async (req, res) => {
         })
 
         // Create Property Document at the database.
-        const propertyDocument = await prisma.propertyDocuments.create({
+        const propertyDocument = await prisma.common_propertydocuments.create({
             data: {
-                propertyId: Number(propertyId),
+                propertyid_id: Number(propertyId),
                 document_type: documentType,
                 file_path: `tmp/${fileName}`,
             }
         });
+
+        propertyDocument.id = Number(propertyDocument.id);
+        propertyDocument.propertyid_id = Number(propertyDocument.propertyid_id);
 
         return res.status(201).json({
             statusCode: 201,
@@ -132,9 +159,9 @@ export const getDocument = async (req, res) => {
 
     try {
         // Check if the property document exist or not.
-        if (!(await prisma.propertyDocuments.findFirst({
+        if (!(await prisma.common_propertydocuments.findFirst({
             where: {
-                propertyId: Number(propertyId)
+                propertyid_id: Number(propertyId)
             }
         }))) {
             return res.status(404).json({
@@ -144,9 +171,9 @@ export const getDocument = async (req, res) => {
         }
 
         // Retrieve property document from the database.
-        const propertyDocument = await prisma.propertyDocuments.findFirst({
+        const propertyDocument = await prisma.common_propertydocuments.findFirst({
             where: {
-                propertyId: Number(propertyId),
+                propertyid_id: Number(propertyId),
             }
         });
 
@@ -169,11 +196,6 @@ export const getDocument = async (req, res) => {
             readStream.pipe(res.status(200));
         });
 
-        // return res.status(200).json({
-        //     statusCode: 200,
-        //     message: 'Property Doucment found successfully',
-        //     data: propertyDocument,
-        // });
     } catch(error) {
         console.log(error.message)
         return res.status(500).json({

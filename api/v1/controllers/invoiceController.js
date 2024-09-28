@@ -6,19 +6,19 @@ export const getInvoices = async (req, res) => {
     const { propertyId } = req.params;
 
     try {
-        const invoices = await prisma.invoice.findMany({
+        const invoices = await prisma.common_invoice.findMany({
             where: {
-                transactionId: parseInt(propertyId),
+                transactionid_id: parseInt(propertyId),
             },
         });
 
-        res.status(200).json({
+        return res.status(200).json({
             statusCode: 200,
             message: 'Invoices retrieved successfully',
             data: invoices,
         });
     } catch (error) {
-        res.status(500).json({
+        return res.status(500).json({
             statusCode: 500,
             message: 'An error occurred',
             error: error.message,

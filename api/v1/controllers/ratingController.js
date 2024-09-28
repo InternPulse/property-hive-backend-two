@@ -24,25 +24,32 @@ class RatingController {
             const { propertyId } = req.params;
 
             // Check if the property ratings exist at or not
-            if (!(await prisma.ratings.findFirst({ where: { propertyId: Number(propertyId) } }))) {
+            if (!(await prisma.common_ratings.findFirst({ where: { propertyid_id: Number(propertyId) } }))) {
                 return res.status(404).json({
                     statusCode: 404,
-                    message: 'Rating not found'
+                    message: 'Ratings not found'
                 });
             }
 
             // Get all ratings for specific property.
-            const ratings = await prisma.ratings.findMany({
+            const ratings = await prisma.common_ratings.findMany({
                 where: {
-                    propertyId: Number(propertyId),
+                    propertyid_id: Number(propertyId),
                 }
             });
+
+            for (let rating of ratings) {
+                rating.id = Number(rating.id);
+                rating.userid_id = Number(rating.userid_id);
+                rating.propertyid_id = Number(rating.propertyid_id);
+    
+            }
 
             // Return list of ratings.
             return res.status(200).json({
                 statusCode: 200,
                 data: ratings,
-                message: "Rating found successfully"
+                message: "Ratings found successfully"
             });
         } catch(error) {
             // Return Internal Server Error (500).
@@ -72,7 +79,7 @@ class RatingController {
     static async updateRating(req, res) {
         try {
             // Get property id form request parameters.
-            const { propertyId } = req.params;
+            const { propertyId, rateId } = req.params;
 
             // Get the rating data from request body.
             const {
@@ -97,7 +104,7 @@ class RatingController {
             }
 
             // Check if property rating exist or not
-            if (!(await prisma.ratings.findFirst({ where: { propertyId: Number(propertyId) } }))) {
+            if (!(await prisma.common_ratings.findFirst({ where: { propertyid_id: Number(propertyId) } }))) {
                 return res.status(404).json({
                     statusCode: 404,
                     message: 'Rating not found'
@@ -105,16 +112,16 @@ class RatingController {
             }
 
             // Get rating Id
-            const ratingId = await prisma.ratings.findFirst({
+            const ratingId = await prisma.common_ratings.findFirst({
                 where: {
-                    propertyId: Number(propertyId)
+                    propertyid_id: Number(propertyId)
                 }
             });
 
             // Update property rating
-            const updatedRating = await prisma.ratings.update({
+            const updatedRating = await prisma.common_ratings.update({
                 where: {
-                    id: Number(ratingId.id)
+                    id: Number(rateId)
                 },
                 data: {
                     rate,
@@ -122,6 +129,9 @@ class RatingController {
                 },
             });
 
+            updatedRating.id = Number(updatedRating.id);
+            updatedRating.propertyid_id = Number(updatedRating.propertyid_id);
+            updatedRating.userid_id = Number(updatedRating.userid_id);
             // return the updated rating
             res.status(200).json({
                 data: updatedRating,
@@ -156,10 +166,10 @@ class RatingController {
 
         try {
             // Check if the property exist at or not
-            if (!(await prisma.property.findFirst({ where: { id: Number(propertyId) } }))) {
+            if (!(await prisma.common_property.findFirst({ where: { id: Number(propertyId) } }))) {
                 return res.status(404).json({
                     statusCode: 404,
-                    message: 'Rating not found'
+                    message: 'Property not found'
                 });
             }
 
@@ -183,14 +193,25 @@ class RatingController {
                 });
             }
 
-            const propertyRating = await prisma.ratings.create({
+            const propertyRating = await prisma.common_ratings.create({
                 data: {
                     rate,
                     comment,
+<<<<<<< HEAD
+                    propertyid_id: Number(propertyId),
+                    userid_id: Number(userId)
+=======
                     propertyId: Number(propertyId),
                     userId: Number(userId)
+>>>>>>> 51cac09ee2a10cb44d69f3244da61cb02919c7ce
                 }
             });
+
+            propertyRating.id = Number(propertyRating.id);
+            propertyRating.userid_id = Number(propertyRating.userid_id);
+            propertyRating.propertyid_id = Number(propertyRating.propertyid_id);
+            
+            console.log(propertyRating)
 
             return res.status(201).json({
                 statusCode: 201,
