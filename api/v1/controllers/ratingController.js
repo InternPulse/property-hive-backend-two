@@ -76,12 +76,12 @@ class RatingController {
 
             // Get the rating data from request body.
             const {
-                rating,
+                rate,
                 comment
             } = req.body;
 
             // Check for input validation (rating, comment)
-            if (typeof rating !== 'number' || typeof comment !== 'string') {
+            if (typeof rate !== 'number' || typeof comment !== 'string') {
                 return res.status(400).json({
                     statusCode: 400,
                     message: "The provided fileds are not valid"
@@ -89,7 +89,7 @@ class RatingController {
             }
 
             // Check if rating between 1 - 5
-            if (!(rating <= 5 && rating >= 1)) {
+            if (!(rate <= 5 && rate >= 1)) {
                 return res.status(400).json({
                     statusCode: 400,
                     message: 'Rating value should be between 1 and 5',
@@ -117,7 +117,7 @@ class RatingController {
                     id: Number(ratingId.id)
                 },
                 data: {
-                    rating,
+                    rate,
                     comment
                 },
             });
@@ -150,7 +150,7 @@ class RatingController {
 
         const {
             comment,
-            rating,
+            rate,
             userId
         } = req.body;
 
@@ -165,7 +165,7 @@ class RatingController {
 
             // Check for input validation (rating, comment)
             if (
-                typeof rating !== 'number' ||
+                typeof rate !== 'number' ||
                 typeof comment !== 'string' ||
                 comment.length <= 0
             ) {
@@ -176,7 +176,7 @@ class RatingController {
             }
 
             // Check if rating between 1 - 5
-            if (!(rating <= 5 && rating >= 1)) {
+            if (!(rate <= 5 && rate >= 1)) {
                 return res.status(400).json({
                     statusCode: 400,
                     message: 'Rating value should be between 1 and 5',
@@ -185,10 +185,10 @@ class RatingController {
 
             const propertyRating = await prisma.ratings.create({
                 data: {
-                    rating,
+                    rate,
                     comment,
-                    propertyId,
-                    userId
+                    propertyId: Number(propertyId),
+                    userId: Number(userId)
                 }
             });
 
