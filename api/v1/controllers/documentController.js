@@ -7,7 +7,24 @@ export const deleteDocument = async (req, res) => {
     const { propertyId } = req.params;
 
     try {
+<<<<<<< HEAD
         let propertyDocument = await prisma.common_propertydocuments.findFirst({
+=======
+        let propertyDocument = await prisma.propertyDocuments.findFirst({
+            where: {
+                propertyId: Number(propertyId)
+            }
+        })
+
+        if (!propertyDocument) {
+            return res.status(404).json({
+                statusCode: 404,
+                message: "Property Document Not Found",
+            });
+        }
+
+        await prisma.propertyDocuments.deleteMany({
+>>>>>>> 51cac09ee2a10cb44d69f3244da61cb02919c7ce
             where: {
                 propertyid_id: Number(propertyId)
             }
@@ -34,10 +51,14 @@ export const deleteDocument = async (req, res) => {
             console.log('File Deleted Successfully');
         });
 
+<<<<<<< HEAD
         propertyDocument.id = Number(propertyDocument.id)
         propertyDocument.propertyid_id = Number(propertyDocument.propertyid_id);
 
         return res.status(200).json({
+=======
+        res.status(200).json({
+>>>>>>> 51cac09ee2a10cb44d69f3244da61cb02919c7ce
             statusCode: 200,
             message: 'Document(s) deleted successfully',
             data: [],

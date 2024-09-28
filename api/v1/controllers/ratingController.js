@@ -197,8 +197,13 @@ class RatingController {
                 data: {
                     rate,
                     comment,
+<<<<<<< HEAD
                     propertyid_id: Number(propertyId),
                     userid_id: Number(userId)
+=======
+                    propertyId: Number(propertyId),
+                    userId: Number(userId)
+>>>>>>> 51cac09ee2a10cb44d69f3244da61cb02919c7ce
                 }
             });
 
