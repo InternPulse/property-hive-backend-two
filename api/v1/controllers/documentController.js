@@ -7,11 +7,33 @@ export const deleteDocument = async (req, res) => {
     const { propertyId } = req.params;
 
     try {
-        await prisma.propertyDocument.deleteMany({
+        let propertyDocument = await prisma.propertyDocuments.findFirst({
+            where: {
+                propertyId: Number(propertyId)
+            }
+        })
+
+        if (!propertyDocument) {
+            return res.status(404).json({
+                statusCode: 404,
+                message: "Property Document Not Found",
+            });
+        }
+
+        await prisma.propertyDocuments.deleteMany({
             where: {
                 propertyId: parseInt(propertyId),
             },
         });
+
+        // Delete property document file from local disk.
+        fs.unlink(propertyDocument.file_path, (error) => {
+            if (error) {
+                throw new Error(`Error during file remove: ${error.message}`);
+            }
+            console.log('File Deleted Successfully');
+        });
+
         res.status(200).json({
             statusCode: 200,
             message: 'Document(s) deleted successfully',
@@ -69,11 +91,7 @@ export const addDocument = async (req, res) => {
         // Save the property document in the local disk at /tmp directory.
         fs.writeFile(`tmp/${fileName}`, documentFile.buffer, { encoding: 'utf-8' }, (error) => {
             if (error) {
-                return res.status(500).json({
-                    statusCode: 500,
-                    messgae: 'An error occurred',
-                    error: error.message,
-                });
+                throw new Error(error.message);
             } else {
                 console.log('File saved successfully at', `/tmp/${fileName}`);
             }
@@ -134,7 +152,8 @@ export const getDocument = async (req, res) => {
 
         // Read the property document data.
         fs.stat(propertyDocument.file_path, (error, stats) => {
-            if (error ||  !stats.isFile()) {
+            if (error || !stats.isFile()) {
+                console.log(error.message)
                 return res.status(404).json({
                     statusCode: 404,
                     message: 'An error occurred or the property document doesn\'t exist'
