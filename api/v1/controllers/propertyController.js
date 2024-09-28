@@ -173,7 +173,10 @@ export const searchAndFilter = async (req, res) => {
         }
       });
   
-      console.log(properties);
+      for (let property of properties) {
+            property.id = Number(property.id)
+            property.sellerid_id = Number(property.sellerid_id)
+        }
 
       return res.status(200).json({
         statusCode: 200,
@@ -295,7 +298,7 @@ export const updateProperty = async (req, res) => {
                 address: address || findProperty.address,
                 price: price ? Number(price) : findProperty.price,
                 description: description || findProperty.description,
-                squaremeters: squaremeters ? Number(squaremeters) : findProperty.squaremeters, // Use lowercase 'squaremeters'
+                squaremeters: squaremeters ? String(squaremeters) : findProperty.squaremeters, // Use lowercase 'squaremeters'
                 property_type: propertyType || findProperty.property_type // Ensure propertyType matches your schema
             }
         });
