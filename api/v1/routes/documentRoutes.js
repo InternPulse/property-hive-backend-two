@@ -11,7 +11,7 @@ const documentRoutes = express.Router();
 
 documentRoutes.delete('/properties/:propertyId/documents', deleteDocument);
 
-documentRoutes.post('/properties/:propertyId/documents', upload.single('file'), addDocument);
+documentRoutes.post('/properties/:propertyId/documents', upload.single('documentFile'), addDocument);
 
 documentRoutes.get('/properties/:propertyId/documents', getDocument)
 
