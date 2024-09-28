@@ -7,18 +7,43 @@ export const deleteDocument = async (req, res) => {
     const { propertyId } = req.params;
 
     try {
-        await prisma.propertyDocument.deleteMany({
+        let propertyDocument = await prisma.common_propertydocuments.findFirst({
             where: {
-                propertyId: parseInt(propertyId),
+                propertyid_id: Number(propertyId)
+            }
+        })
+
+        if (!propertyDocument) {
+            return res.status(404).json({
+                statusCode: 404,
+                message: "Property Document Not Found",
+            });
+        }
+
+        await prisma.common_propertydocuments.deleteMany({
+            where: {
+                propertyid_id: Number(propertyId),
             },
         });
-        res.status(200).json({
+
+        // Delete property document file from local disk.
+        fs.unlink(propertyDocument.file_path, (error) => {
+            if (error) {
+                throw new Error(`Error during file remove: ${error.message}`);
+            }
+            console.log('File Deleted Successfully');
+        });
+
+        propertyDocument.id = Number(propertyDocument.id)
+        propertyDocument.propertyid_id = Number(propertyDocument.propertyid_id);
+
+        return res.status(200).json({
             statusCode: 200,
             message: 'Document(s) deleted successfully',
             data: [],
         });
     } catch (error) {
-        res.status(500).json({
+        return res.status(500).json({
             statusCode: 500,
             message: 'An error occurred',
             error: error.message,
@@ -43,7 +68,7 @@ export const addDocument = async (req, res) => {
         const documentFile = req.file;
         
         // Check if property document exist or not.
-        if (!(await prisma.property.findFirst({
+        if (!(await prisma.common_property.findFirst({
             where: {
                 id: Number(propertyId),
             }
@@ -69,24 +94,23 @@ export const addDocument = async (req, res) => {
         // Save the property document in the local disk at /tmp directory.
         fs.writeFile(`tmp/${fileName}`, documentFile.buffer, { encoding: 'utf-8' }, (error) => {
             if (error) {
-                return res.status(500).json({
-                    statusCode: 500,
-                    messgae: 'An error occurred',
-                    error: error.message,
-                });
+                throw new Error(error.message);
             } else {
                 console.log('File saved successfully at', `/tmp/${fileName}`);
             }
         })
 
         // Create Property Document at the database.
-        const propertyDocument = await prisma.propertyDocuments.create({
+        const propertyDocument = await prisma.common_propertydocuments.create({
             data: {
-                propertyId: Number(propertyId),
+                propertyid_id: Number(propertyId),
                 document_type: documentType,
                 file_path: `tmp/${fileName}`,
             }
         });
+
+        propertyDocument.id = Number(propertyDocument.id);
+        propertyDocument.propertyid_id = Number(propertyDocument.propertyid_id);
 
         return res.status(201).json({
             statusCode: 201,
@@ -114,9 +138,9 @@ export const getDocument = async (req, res) => {
 
     try {
         // Check if the property document exist or not.
-        if (!(await prisma.propertyDocuments.findFirst({
+        if (!(await prisma.common_propertydocuments.findFirst({
             where: {
-                propertyId: Number(propertyId)
+                propertyid_id: Number(propertyId)
             }
         }))) {
             return res.status(404).json({
@@ -126,15 +150,16 @@ export const getDocument = async (req, res) => {
         }
 
         // Retrieve property document from the database.
-        const propertyDocument = await prisma.propertyDocuments.findFirst({
+        const propertyDocument = await prisma.common_propertydocuments.findFirst({
             where: {
-                propertyId: Number(propertyId),
+                propertyid_id: Number(propertyId),
             }
         });
 
         // Read the property document data.
         fs.stat(propertyDocument.file_path, (error, stats) => {
-            if (error ||  !stats.isFile()) {
+            if (error || !stats.isFile()) {
+                console.log(error.message)
                 return res.status(404).json({
                     statusCode: 404,
                     message: 'An error occurred or the property document doesn\'t exist'
@@ -150,11 +175,6 @@ export const getDocument = async (req, res) => {
             readStream.pipe(res.status(200));
         });
 
-        // return res.status(200).json({
-        //     statusCode: 200,
-        //     message: 'Property Doucment found successfully',
-        //     data: propertyDocument,
-        // });
     } catch(error) {
         console.log(error.message)
         return res.status(500).json({
