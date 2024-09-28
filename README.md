@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Live link is at 
+Live link is at http://express-api.propertyhive.com.ng/api/v1/property-hive
 
 Doc link at 
 
