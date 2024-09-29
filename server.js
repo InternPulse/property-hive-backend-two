@@ -20,10 +20,10 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 // API Routes
-app.use('/api/v1/property-hive', ratingRoutes);
-app.use("/api/v1/property-hive", propertyRoutes);
-app.use("/api/v1/property-hive", documentRoutes);
-app.use("/api/v1/property-hive", invoiceRouter);
+app.use('/api/v1', ratingRoutes);
+app.use("/api/v1", propertyRoutes);
+app.use("/api/v1", documentRoutes);
+app.use("/api/v1", invoiceRouter);
 
 
 async function main() {
