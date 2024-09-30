@@ -1,5 +1,10 @@
 import { PrismaClient } from "@prisma/client";
 import fs from 'fs';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const STATIC_FILE_DIRECTORY = process.env.STATIC_FILE_DIRECTORY;
 
 const prisma = new PrismaClient();
 
@@ -89,14 +94,15 @@ export const addDocument = async (req, res) => {
             });
         }
 
+        const baseUrl = `${req.protocol}://${req.get('host')}`;
         const fileName = `${Date.now()}-${propertyId}`;
 
         // Save the property document in the local disk at /tmp directory.
-        fs.writeFile(`tmp/${fileName}`, documentFile.buffer, { encoding: 'utf-8' }, (error) => {
+        fs.writeFile(`${STATIC_FILE_DIRECTORY}/documents/${fileName}`, documentFile.buffer, { encoding: 'utf-8' }, (error) => {
             if (error) {
                 throw new Error(error.message);
             } else {
-                console.log('File saved successfully at', `/tmp/${fileName}`);
+                console.log('File saved successfully at', `/documents/${fileName}`);
             }
         })
 
@@ -105,7 +111,7 @@ export const addDocument = async (req, res) => {
             data: {
                 propertyid_id: Number(propertyId),
                 document_type: documentType,
-                file_path: `tmp/${fileName}`,
+                file_path: `${baseUrl}/${STATIC_FILE_DIRECTORY}/documents/${fileName}`,
             }
         });
 
@@ -156,8 +162,12 @@ export const getDocument = async (req, res) => {
             }
         });
 
+        const fileName = propertyDocument.file_path.split('/')[propertyDocument.file_path.split('/').length - 1];
+
+        const filePath  = `${STATIC_FILE_DIRECTORY}/documents/${fileName}`;
+        
         // Read the property document data.
-        fs.stat(propertyDocument.file_path, (error, stats) => {
+        fs.stat(filePath, (error, stats) => {
             if (error || !stats.isFile()) {
                 console.log(error.message)
                 return res.status(404).json({
@@ -166,10 +176,10 @@ export const getDocument = async (req, res) => {
                 });
             }
 
-            res.setHeader('Content-Disposition', `attachment; filename=${propertyDocument.file_path.split('/')[-1]}`);
+            res.setHeader('Content-Disposition', `attachment; filename=${fileName}`);
             res.setHeader('Content-Type', 'application/octet-stream');
 
-            const readStream = fs.createReadStream(propertyDocument.file_path);
+            const readStream = fs.createReadStream(filePath);
 
             // Return property document content.
             readStream.pipe(res.status(200));
