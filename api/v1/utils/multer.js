@@ -11,7 +11,7 @@ const STATIC_FILE_DIRECTORY = process.env.STATIC_FILE_DIRECTORY;
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         let dir;
-        if (file.fieldname === 'images')  {
+        if (file.fieldname === 'propertyImage')  {
             dir = `./${STATIC_FILE_DIRECTORY}/images`;
         }
         else {

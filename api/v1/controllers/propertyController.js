@@ -23,8 +23,10 @@ export const addProperty = async (req, res) => {
         numberOfBedrooms,
         payment_frequency,
         installment_duration,
-        created_at,
-        updated_at
+        down_payment,
+        installment_payment_price,
+        duration,
+        keywords
     } = req.body;
 
     try {
@@ -37,14 +39,25 @@ export const addProperty = async (req, res) => {
         if (!sellerExists) {
             return res.status(400).json({
                 statusCode: 400,
-                message: "Invalid sellerId: User does not exist"
+                message: "Invalid sellerId: User (seller) does not exist"
             });
         }
-        
-        if (!name || !state || !city || !address || !price || !squaremeters || !propertyType) {
+        console.log(req.body)
+        if (!name ||
+            !state ||
+            !city ||
+            !address ||
+            !price ||
+            !squaremeters ||
+            !propertyType ||
+            !payment_frequency ||
+            !installment_duration ||
+            !down_payment ||
+            !installment_payment_price ||
+            !duration) {
             return res.status(400).json({
-                statusCode: 404,
-                message: "Missing required fields: sellerId, name, state, city, address, price, squaremeters, propertyType"
+                statusCode: 400,
+                message: "Missing required fields: sellerId, name, state, city, address, price, squaremeters, propertyType, payment_frequency, installment_duration, down_payment, installment_payment_price,"
             });
         }
 
@@ -65,8 +78,10 @@ export const addProperty = async (req, res) => {
                 number_of_bedrooms: Number(numberOfBedrooms),
                 payment_frequency: String(payment_frequency),
                 installment_duration: String(installment_duration),
-                updated_at,
-                created_at,
+                down_payment: down_payment,
+                installment_payment_price: Number(installment_payment_price),
+                duration: duration,
+                keywords: keywords
             }
         });
 
@@ -107,8 +122,8 @@ export const addProperty = async (req, res) => {
             });
         }
         // Seralize the id's from BigInt to Int
-        newProperty.id =  Number(newProperty.id);
-        newProperty.sellerid_id = Number(newProperty.sellerid_id);
+        // newProperty.id =  Number(newProperty.id);
+        // newProperty.sellerid_id = Number(newProperty.sellerid_id);
 
         console.log(newProperty);
 
@@ -168,14 +183,14 @@ export const getAllProperty = async (req, res) => {
         console.log(properties)
 
         // Seralize the id's from BigInt to Int
-        for (let property of properties) {
-            property.id = Number(property.id)
-            property.sellerid_id = Number(property.sellerid_id)
-            property.common_user.id = Number(property.common_user.id);
+        // for (let property of properties) {
+        //     property.id = Number(property.id)
+        //     property.sellerid_id = Number(property.sellerid_id)
+        //     property.common_user.id = Number(property.common_user.id);
 
-            for (let propertyImg of property.common_propertyimages)
-                propertyImg.id = Number(propertyImg.id);
-        }
+        //     for (let propertyImg of property.common_propertyimages)
+        //         propertyImg.id = Number(propertyImg.id);
+        // }
 
         console.log(properties)
         // Send successful response
@@ -199,7 +214,7 @@ export const getAllProperty = async (req, res) => {
 
 export const searchAndFilter = async (req, res) => {
     try {
-      const {state, city, property_type, minPrice, maxPrice, squaremeters, searchTerm} = req.query;
+      const {state, city, property_type, minPrice, maxPrice, squaremeters, searchTerm, keywords } = req.query;
 
       const searchFilters = {
         // properties are to meet conditions of specified filters in AND condition to be displayed
@@ -221,7 +236,8 @@ export const searchAndFilter = async (req, res) => {
                 OR: [
                     {name: {contains: searchTerm, mode: 'insensitive'}},
                     {description: {contains: searchTerm, mode: 'insensitive'}},
-                    {address: {contains: searchTerm, mode: 'insensitive'}}
+                    {address: {contains: searchTerm, mode: 'insensitive'}},
+                    { keywords: {contains: searchTerm} }
                 ]
             } : undefined,
         ].filter(Boolean) // removes any undefined values from the AND array
@@ -232,10 +248,11 @@ export const searchAndFilter = async (req, res) => {
         }
       });
   
-      for (let property of properties) {
-            property.id = Number(property.id)
-            property.sellerid_id = Number(property.sellerid_id)
-        }
+    // Seralize the id's from BigInt to Int
+    // for (let property of properties) {
+    //     property.id = Number(property.id)
+    //     property.sellerid_id = Number(property.sellerid_id)
+    // }
 
       return res.status(200).json({
         statusCode: 200,
@@ -300,18 +317,19 @@ export const getSingleProperty = async (req, res) => {
         }
 
         // Seralize the id's from BigInt to Int
-        property.id = Number(property.id);
-        property.sellerid_id = Number(property.sellerid_id);
-        property.common_user.id = Number(property.common_user.id);
 
-        for (let rating of property.common_ratings) {
-            rating.id = Number(rating.id);
-            rating.common_user.id = Number(rating.common_user.id);
-        }
+        // property.id = Number(property.id);
+        // property.sellerid_id = Number(property.sellerid_id);
+        // property.common_user.id = Number(property.common_user.id);
 
-        for (let propertyImg of property.common_propertyimages) {
-            propertyImg.id = Number(propertyImg.id);
-        }
+        // for (let rating of property.common_ratings) {
+        //     rating.id = Number(rating.id);
+        //     rating.common_user.id = Number(rating.common_user.id);
+        // }
+
+        // for (let propertyImg of property.common_propertyimages) {
+        //     propertyImg.id = Number(propertyImg.id);
+        // }
 
         console.log(property)
         return res.status(200).json({
@@ -349,6 +367,9 @@ export const updateProperty = async (req, res) => {
         numberOfBedrooms,
         payment_frequency,
         installment_duration,
+        down_payment,
+        installment_payment_price,
+        duration,
     } = req.body;
 
     try {
@@ -381,6 +402,9 @@ export const updateProperty = async (req, res) => {
                 number_of_bedrooms: numberOfBedrooms ? Number(numberOfBedrooms) : findProperty.numberOfBedrooms,
                 payment_frequency: payment_frequency || findProperty.payment_frequency,
                 installment_duration: installment_duration || findProperty.installment_duration,
+                down_payment: down_payment || findProperty.down_payment,
+                installment_payment_price: Number(installment_payment_price) || findProperty.installment_payment_price,
+                duration: duration || findProperty.duration
             }
         });
 
@@ -402,8 +426,11 @@ export const updateProperty = async (req, res) => {
         // }
 
         console.log(updatedProperty);
-        updatedProperty.id = Number(updatedProperty.id);
-        updatedProperty.sellerid_id = Number(updatedProperty.sellerid_id);
+        
+        // Seralize the id's from BigInt to Int
+        
+        // updatedProperty.id = Number(updatedProperty.id);
+        // updatedProperty.sellerid_id = Number(updatedProperty.sellerid_id);
 
         return res.status(200).json({
             statusCode: 200,
@@ -503,8 +530,9 @@ export const deleteProperty = async (req, res) => {
             where: { id: Number(propertyId) }
         });
 
-        findProperty.id = Number(findProperty.id);
-        findProperty.sellerid_id = Number(findProperty.sellerid_id);
+        // Seralize the id's from BigInt to Int
+        // findProperty.id = Number(findProperty.id);
+        // findProperty.sellerid_id = Number(findProperty.sellerid_id);
 
         return res.status(200).json({
             statusCode: 200,
