@@ -7,6 +7,8 @@ dotenv.config();
 
 const STATIC_FILE_DIRECTORY = process.env.STATIC_FILE_DIRECTORY;
 
+const BASE_URL = process.env.BASE_URL;
+
 export const addProperty = async (req, res) => {
     const {
         sellerId,
@@ -86,13 +88,13 @@ export const addProperty = async (req, res) => {
         });
 
         // Process images
-        const baseUrl = `${req.protocol}://${req.get('host')}`;
+        // const baseUrl = `${req.protocol}://${req.get('host')}`;
         const imageUrls = [];
         const documentUrls = [];
 
         if (req.files['propertyImage'] && req.files['propertyImage'].length > 0) {
             req.files['propertyImage'].forEach(file => {
-                const imageUrl = `${baseUrl}/${STATIC_FILE_DIRECTORY}/images/${file.filename}`; // save full image URL
+                const imageUrl = `${BASE_URL}/${STATIC_FILE_DIRECTORY}/images/${file.filename}`; // save full image URL
                 imageUrls.push(imageUrl);
             });
 
@@ -108,7 +110,7 @@ export const addProperty = async (req, res) => {
 
         if (req.files['propertyDocument'] && req.files['propertyDocument'].length > 0) {
             req.files['propertyDocument'].forEach(file => {
-                const documentUrl = `${baseUrl}/${STATIC_FILE_DIRECTORY}/documents/${file.filename}`;
+                const documentUrl = `${BASE_URL}/${STATIC_FILE_DIRECTORY}/documents/${file.filename}`;
                 documentUrls.push(documentUrl);
             });
 
