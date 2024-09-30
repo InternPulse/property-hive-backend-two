@@ -1,21 +1,46 @@
 import prisma from "../../../DB/db.config.js";
+import path from 'path';
+import fs from 'fs';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const STATIC_FILE_DIRECTORY = process.env.STATIC_FILE_DIRECTORY;
 
 export const addProperty = async (req, res) => {
-    const { sellerId, name, state, city, address, price, description, squaremeters, propertyType, images, is_sold, created_at, updated_at } = req.body;
+    const {
+        sellerId,
+        name,
+        state,
+        city,
+        address,
+        price,
+        description,
+        squaremeters,
+        propertyType,
+        is_sold,
+        numberOfBathrooms,
+        numberOfBedrooms,
+        payment_frequency,
+        installment_duration,
+        created_at,
+        updated_at
+    } = req.body;
 
     try {
+        
         // Check if the sellerId exists in the User table
         const sellerExists = await prisma.common_user.findUnique({
-            where: { id: sellerId }
+            where: { id: Number(sellerId) }
         });
-
+        
         if (!sellerExists) {
             return res.status(400).json({
                 statusCode: 400,
                 message: "Invalid sellerId: User does not exist"
             });
         }
-
+        
         if (!name || !state || !city || !address || !price || !squaremeters || !propertyType) {
             return res.status(400).json({
                 statusCode: 404,
@@ -35,16 +60,30 @@ export const addProperty = async (req, res) => {
                 description: description || null,
                 squaremeters: String(squaremeters), // Ensure squaremeters is a string
                 property_type: propertyType, // Map propertyType to property_type
-                is_sold,
+                is_sold: Boolean(is_sold),
+                number_of_bathrooms: Number(numberOfBathrooms),
+                number_of_bedrooms: Number(numberOfBedrooms),
+                payment_frequency: String(payment_frequency),
+                installment_duration: String(installment_duration),
                 updated_at,
                 created_at,
             }
         });
 
-        if (images && images.length > 0) {
-            const propertyImages = images.map(img => ({
-                propertyId: newProperty.id,
-                img
+        // Process images
+        const baseUrl = `${req.protocol}://${req.get('host')}`;
+        const imageUrls = [];
+        const documentUrls = [];
+
+        if (req.files['propertyImage'] && req.files['propertyImage'].length > 0) {
+            req.files['propertyImage'].forEach(file => {
+                const imageUrl = `${baseUrl}/${STATIC_FILE_DIRECTORY}/images/${file.filename}`; // save full image URL
+                imageUrls.push(imageUrl);
+            });
+
+            const propertyImages = imageUrls.map(imgURL => ({
+                propertyid_id: newProperty.id,
+                img: imgURL
             }));
 
             await prisma.common_propertyimages.createMany({
@@ -52,9 +91,26 @@ export const addProperty = async (req, res) => {
             });
         }
 
+        if (req.files['propertyDocument'] && req.files['propertyDocument'].length > 0) {
+            req.files['propertyDocument'].forEach(file => {
+                const documentUrl = `${baseUrl}/${STATIC_FILE_DIRECTORY}/documents/${file.filename}`;
+                documentUrls.push(documentUrl);
+            });
+
+            const propertyDocuments = documentUrls.map(documentURL => ({
+                propertyid_id: newProperty.id,
+                file_path: documentURL
+            }));
+
+            await prisma.common_propertydocuments.createMany({
+                data: propertyDocuments
+            });
+        }
         // Seralize the id's from BigInt to Int
         newProperty.id =  Number(newProperty.id);
         newProperty.sellerid_id = Number(newProperty.sellerid_id);
+
+        console.log(newProperty);
 
         return res.status(200).json({
             statusCode: 200,
@@ -116,6 +172,9 @@ export const getAllProperty = async (req, res) => {
             property.id = Number(property.id)
             property.sellerid_id = Number(property.sellerid_id)
             property.common_user.id = Number(property.common_user.id);
+
+            for (let propertyImg of property.common_propertyimages)
+                propertyImg.id = Number(propertyImg.id);
         }
 
         console.log(properties)
@@ -273,7 +332,24 @@ export const getSingleProperty = async (req, res) => {
 
 export const updateProperty = async (req, res) => {
     const propertyId = req.params.id;
-    const { sellerId, name, state, city, address, price, description, squaremeters, propertyType, images } = req.body;
+    // const { sellerId, name, state, city, address, price, description, squaremeters, propertyType, is_sold } = req.body;
+
+    const {
+        sellerId,
+        name,
+        state,
+        city,
+        address,
+        price,
+        description,
+        squaremeters,
+        propertyType,
+        is_sold,
+        numberOfBathrooms,
+        numberOfBedrooms,
+        payment_frequency,
+        installment_duration,
+    } = req.body;
 
     try {
         const findProperty = await prisma.common_property.findUnique({
@@ -299,26 +375,31 @@ export const updateProperty = async (req, res) => {
                 price: price ? Number(price) : findProperty.price,
                 description: description || findProperty.description,
                 squaremeters: squaremeters ? String(squaremeters) : findProperty.squaremeters, // Use lowercase 'squaremeters'
-                property_type: propertyType || findProperty.property_type // Ensure propertyType matches your schema
+                property_type: propertyType || findProperty.property_type, // Ensure propertyType matches your schema
+                is_sold: is_sold ? Boolean(is_sold) : findProperty.is_sold,
+                number_of_bathrooms: numberOfBathrooms ? Number(numberOfBathrooms) : findProperty.numberOfBathrooms,
+                number_of_bedrooms: numberOfBedrooms ? Number(numberOfBedrooms) : findProperty.numberOfBedrooms,
+                payment_frequency: payment_frequency || findProperty.payment_frequency,
+                installment_duration: installment_duration || findProperty.installment_duration,
             }
         });
 
         // If new images are provided, update them in the PropertyImages model
-        if (images && images.length > 0) {
-            // First, delete the existing images for this property
-            await prisma.common_propertyimages.deleteMany({
-                where: { propertyId: Number(propertyId) }
-            });
+        // if (images && images.length > 0) {
+        //     // First, delete the existing images for this property
+        //     await prisma.common_propertyimages.deleteMany({
+        //         where: { propertyid_id: Number(propertyId) }
+        //     });
             
-            const propertyImages = images.map(img => ({
-                propertyId: updatedProperty.id,
-                img
-            }));
+        //     const propertyImages = images.map(img => ({
+        //         propertyid_id: updatedProperty.id,
+        //         img
+        //     }));
 
-            await prisma.common_propertyimages.createMany({
-                data: propertyImages
-            });
-        }
+        //     await prisma.common_propertyimages.createMany({
+        //         data: propertyImages
+        //     });
+        // }
 
         console.log(updatedProperty);
         updatedProperty.id = Number(updatedProperty.id);
@@ -345,7 +426,10 @@ export const deleteProperty = async (req, res) => {
     try {
         // Find the property by ID
         const findProperty = await prisma.common_property.findUnique({
-            where: { id: Number(propertyId) }
+            where: { id: Number(propertyId) },
+            include: {
+                common_propertyimages: true
+            }
         });
 
         if (!findProperty) {
@@ -354,6 +438,45 @@ export const deleteProperty = async (req, res) => {
                 message: "Property not found"
             });
         }
+
+        // Delete the images from the filesystem
+        const deleteImageFiles = findProperty.common_propertyimages.map(image => {
+            // remove upload to static
+            const imagePath = path.join(__dirname, '..', '..', '..', `${STATIC_FILE_DIRECTORY}`, 'images', image.img); // Full path to the image
+            return new Promise((resolve, reject) => {
+                fs.unlink(imagePath, (err) => {
+                    if (err) {
+                        // Ignore if file doesn't exist.
+                        console.log(`Failed to delete an image file: ${imagePath}`);
+                        return reject(err);
+                    }
+                    resolve();
+                });
+            });
+        });
+
+
+        // Delete the images from the filesystem
+        const deleteDocumentFiles = findProperty.common_propertyimages.map(image => {
+            // remove upload to static
+            const imagePath = path.join(__dirname, '..', '..', '..', `${STATIC_FILE_DIRECTORY}`, 'documents', image.img); // Full path to the image
+            return new Promise((resolve, reject) => {
+                fs.unlink(imagePath, (err) => {
+                    if (err) {
+                        // Ignore if file doesn't exist.
+                        console.log(`Failed to delete an document file: ${imagePath}`);
+                        return reject(err);
+                    }
+                    resolve();
+                });
+            });
+        });
+
+        // Wait for all images to be deleted from disk
+        await Promise.all(deleteImageFiles);
+        
+        // Wait for all images to be deleted from disk
+        await Promise.all(deleteDocumentFiles);
 
         // Delete related PropertyImages
         await prisma.common_propertyimages.deleteMany({

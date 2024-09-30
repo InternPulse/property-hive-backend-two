@@ -9,6 +9,8 @@ import cors from 'cors';
 
 dotenv.config();
 
+const STATIC_FILE_DIRECTORY = process.env.STATIC_FILE_DIRECTORY;
+
 const PORT = process.env.PORT || 3000;
 
 const prisma = new PrismaClient();
@@ -19,19 +21,25 @@ app.use(cors());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
+// Serve the static files
+app.use(`/${STATIC_FILE_DIRECTORY}/images`, express.static(`${STATIC_FILE_DIRECTORY}/images`));
+app.use(`/${STATIC_FILE_DIRECTORY}/documents`, express.static(`${STATIC_FILE_DIRECTORY}/documents`));
+
 // API Routes
-app.use('/api/v1/property-hive', ratingRoutes);
-app.use("/api/v1/property-hive", propertyRoutes);
-app.use("/api/v1/property-hive", documentRoutes);
-app.use("/api/v1/property-hive", invoiceRouter);
+app.use('/api/v1', ratingRoutes);
+app.use("/api/v1", propertyRoutes);
+app.use("/api/v1", documentRoutes);
+app.use("/api/v1", invoiceRouter);
 
 
 async function main() {
     try {
         await prisma.$connect();
+
         app.listen(PORT, () => {
             console.log(`Server running on port ${PORT}`);
         });
+
     } catch (error) {
         console.error('Failed to connect to the database:', error);
         await prisma.$disconnect();
