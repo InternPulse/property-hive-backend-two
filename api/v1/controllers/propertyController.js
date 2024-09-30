@@ -22,14 +22,12 @@ export const addProperty = async (req, res) => {
         description,
         squaremeters,
         propertyType,
-        is_sold,
         numberOfBathrooms,
         numberOfBedrooms,
         payment_frequency,
         installment_duration,
         down_payment,
         installment_payment_price,
-        duration,
         keywords
     } = req.body;
 
@@ -46,7 +44,7 @@ export const addProperty = async (req, res) => {
                 message: "Invalid sellerId: User (seller) does not exist"
             });
         }
-        console.log(req.body)
+
         if (!name ||
             !state ||
             !city ||
@@ -57,11 +55,22 @@ export const addProperty = async (req, res) => {
             !payment_frequency ||
             !installment_duration ||
             !down_payment ||
-            !installment_payment_price ||
-            !duration) {
+            !installment_payment_price) {
             return res.status(400).json({
                 statusCode: 400,
-                message: "Missing required fields: sellerId, name, state, city, address, price, squaremeters, propertyType, payment_frequency, installment_duration, down_payment, installment_payment_price,"
+                message: `Missing required fields:
+                sellerId: ${sellerId},
+                name: ${name},
+                state: ${state},
+                city: ${city},
+                address: ${address},
+                price: ${price},
+                squaremeters: ${squaremeters},
+                propertyType: ${propertyType},
+                payment_frequency: ${payment_frequency},
+                installment_duration: ${installment_duration},
+                down_payment: ${down_payment},
+                installment_payment_price: ${installment_payment_price}`
             });
         }
 
@@ -77,20 +86,17 @@ export const addProperty = async (req, res) => {
                 description: description || null,
                 squaremeters: String(squaremeters), // Ensure squaremeters is a string
                 property_type: propertyType, // Map propertyType to property_type
-                is_sold: Boolean(is_sold),
                 number_of_bathrooms: Number(numberOfBathrooms),
                 number_of_bedrooms: Number(numberOfBedrooms),
                 payment_frequency: String(payment_frequency),
                 installment_duration: String(installment_duration),
                 down_payment: down_payment,
                 installment_payment_price: Number(installment_payment_price),
-                duration: duration,
-                keywords: keywords
+                keywords: keywords.split(' '),
             }
         });
 
         // Process images
-        // const baseUrl = `${req.protocol}://${req.get('host')}`;
         const imageUrls = [];
         const documentUrls = [];
 
