@@ -2,6 +2,8 @@ import prisma from "../../../DB/db.config.js";
 import path from 'path';
 import fs from 'fs';
 import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 
 dotenv.config();
 
@@ -468,10 +470,14 @@ export const deleteProperty = async (req, res) => {
             });
         }
 
+        // Get the current directory path.
+        const __filename = fileURLToPath(import.meta.url);
+        const __dirname = dirname(__filename);
+
         // Delete the images from the filesystem
         const deleteImageFiles = findProperty.common_propertyimages.map(image => {
             // remove upload to static
-            const imagePath = path.join(__dirname, '..', '..', '..', `${STATIC_FILE_DIRECTORY}`, 'images', image.img); // Full path to the image
+            const imagePath = path.join(__dirname, '..', '..', '..', `${STATIC_FILE_DIRECTORY}`, 'images', image.img.split('/')[image.img.split('/').length - 1]); // Full path to the image
             return new Promise((resolve, reject) => {
                 fs.unlink(imagePath, (err) => {
                     if (err) {
@@ -486,14 +492,14 @@ export const deleteProperty = async (req, res) => {
 
 
         // Delete the images from the filesystem
-        const deleteDocumentFiles = findProperty.common_propertyimages.map(image => {
+        const deleteDocumentFiles = findProperty.common_propertyimages.map(document => {
             // remove upload to static
-            const imagePath = path.join(__dirname, '..', '..', '..', `${STATIC_FILE_DIRECTORY}`, 'documents', image.img); // Full path to the image
+            const documentPath = path.join(__dirname, '..', '..', '..', `${STATIC_FILE_DIRECTORY}`, 'documents', document.file_path.split('/')[document.file_path.split('/').length - 1]); // Full path to the document
             return new Promise((resolve, reject) => {
-                fs.unlink(imagePath, (err) => {
+                fs.unlink(documentPath, (err) => {
                     if (err) {
                         // Ignore if file doesn't exist.
-                        console.log(`Failed to delete an document file: ${imagePath}`);
+                        console.log(`Failed to delete an document file: ${documentPath}`);
                         return reject(err);
                     }
                     resolve();
