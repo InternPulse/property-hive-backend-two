@@ -459,7 +459,8 @@ export const deleteProperty = async (req, res) => {
         const findProperty = await prisma.common_property.findUnique({
             where: { id: Number(propertyId) },
             include: {
-                common_propertyimages: true
+                common_propertyimages: true,
+                common_propertydocuments: true
             }
         });
 
@@ -479,7 +480,7 @@ export const deleteProperty = async (req, res) => {
             // remove upload to static
             const imagePath = path.join(__dirname, '..', '..', '..', `${STATIC_FILE_DIRECTORY}`, 'images', image.img.split('/')[image.img.split('/').length - 1]); // Full path to the image
             return new Promise((resolve, reject) => {
-                fs.unlink(imagePath, (err) => {
+                fs.unlink(`${STATIC_FILE_DIRECTORY}/images/${image.img.split('/')[image.img.split('/').length - 1]}`, (err) => {
                     if (err) {
                         // Ignore if file doesn't exist.
                         console.log(`Failed to delete an image file: ${imagePath}`);
@@ -492,11 +493,11 @@ export const deleteProperty = async (req, res) => {
 
 
         // Delete the images from the filesystem
-        const deleteDocumentFiles = findProperty.common_propertyimages.map(document => {
+        const deleteDocumentFiles = findProperty.common_propertydocuments.map(document => {
             // remove upload to static
             const documentPath = path.join(__dirname, '..', '..', '..', `${STATIC_FILE_DIRECTORY}`, 'documents', document.file_path.split('/')[document.file_path.split('/').length - 1]); // Full path to the document
             return new Promise((resolve, reject) => {
-                fs.unlink(documentPath, (err) => {
+                fs.unlink(`${STATIC_FILE_DIRECTORY}/documents/${document.file_path.split('/')[document.file_path.split('/').length - 1]}`, (err) => {
                     if (err) {
                         // Ignore if file doesn't exist.
                         console.log(`Failed to delete an document file: ${documentPath}`);

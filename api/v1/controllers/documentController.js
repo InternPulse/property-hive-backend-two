@@ -6,6 +6,8 @@ dotenv.config();
 
 const STATIC_FILE_DIRECTORY = process.env.STATIC_FILE_DIRECTORY;
 
+const BASE_URL = process.env.BASE_URL;
+
 const prisma = new PrismaClient();
 
 export const deleteDocument = async (req, res) => {
@@ -30,9 +32,8 @@ export const deleteDocument = async (req, res) => {
                 propertyid_id: Number(propertyId),
             },
         });
-
         // Delete property document file from local disk.
-        fs.unlink(propertyDocument.file_path, (error) => {
+        fs.unlink(`${STATIC_FILE_DIRECTORY}/documents/${propertyDocument.file_path.split('/')[propertyDocument.file_path.split('/').length - 1]}`, (error) => {
             if (error) {
                 throw new Error(`Error during file remove: ${error.message}`);
             }
@@ -94,7 +95,6 @@ export const addDocument = async (req, res) => {
             });
         }
 
-        const baseUrl = `${req.protocol}://${req.get('host')}`;
         const fileName = `${Date.now()}-${propertyId}`;
 
         // Save the property document in the local disk at /tmp directory.
@@ -111,7 +111,7 @@ export const addDocument = async (req, res) => {
             data: {
                 propertyid_id: Number(propertyId),
                 document_type: documentType,
-                file_path: `${baseUrl}/${STATIC_FILE_DIRECTORY}/documents/${fileName}`,
+                file_path: `${BASE_URL}/${STATIC_FILE_DIRECTORY}/documents/${fileName}`,
             }
         });
 
