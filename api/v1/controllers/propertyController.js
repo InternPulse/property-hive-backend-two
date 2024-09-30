@@ -249,6 +249,9 @@ export const searchAndFilter = async (req, res) => {
       const properties = await prisma.common_property.findMany({
         where: {
             ...searchFilters
+        },
+        include: {
+            common_propertyimages: true
         }
       });
   
