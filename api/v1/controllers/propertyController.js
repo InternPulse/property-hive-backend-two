@@ -224,62 +224,60 @@ export const getAllProperty = async (req, res) => {
 
 export const searchAndFilter = async (req, res) => {
     try {
-      const {state, city, property_type, minPrice, maxPrice, squaremeters, searchTerm, keywords } = req.query;
+        const { city, name, keywords } = req.query;
 
-      const searchFilters = {
-        // properties are to meet conditions of specified filters in AND condition to be displayed
-        AND: [
-            state ? {state: {contains: state, mode: 'insensitive'}} : undefined,
-            city ? {city: {contains: city, mode: 'insensitive'}} : undefined,
-            property_type ? {property_type: {contains: property_type, mode: 'insensitive'}} : undefined,
-            squaremeters ? {squaremeters: {contains: squaremeters, mode: 'insensitive'}} : undefined,
-            minPrice || maxPrice ? {
-                price: {
-                    ...(minPrice ? {gte: Number(minPrice)} : {}),
-                    ...(maxPrice ? {lte: Number(maxPrice)} : {}),
-                }
-            } : undefined,
-            //If search input contains any keyword that happens to appear in the name, description or address, 
-            //then the "searchTerm" will ensure it(the property) is displayed
-            searchTerm ? {
-                //property doesn't have to meet all conditions
-                OR: [
-                    {name: {contains: searchTerm, mode: 'insensitive'}},
-                    {description: {contains: searchTerm, mode: 'insensitive'}},
-                    {address: {contains: searchTerm, mode: 'insensitive'}},
-                    { keywords: {contains: searchTerm} }
-                ]
-            } : undefined,
-        ].filter(Boolean) // removes any undefined values from the AND array
-      }
-      const properties = await prisma.common_property.findMany({
-        where: {
-            ...searchFilters
-        },
-        include: {
-            common_propertyimages: true
+        // Validate that only city, name, or keywords are provided
+        const allowedQueryParams = ['city', 'name', 'keywords'];
+        const queryParams = Object.keys(req.query);
+
+        const invalidParams = queryParams.filter(param => !allowedQueryParams.includes(param));
+
+        if (invalidParams.length > 0) {
+            return res.status(400).json({
+                statusCode: 400,
+                message: `Invalid query parameter(s): ${invalidParams.join(', ')}. Allowed query parameters are: city, name, keywords.`,
+            });
         }
-      });
-  
-    // Seralize the id's from BigInt to Int
-    // for (let property of properties) {
-    //     property.id = Number(property.id)
-    //     property.sellerid_id = Number(property.sellerid_id)
-    // }
 
-      return res.status(200).json({
-        statusCode: 200,
-        message: 'Search retrieved successfully',
-        data: properties,
-      });
+        const searchFilters = {
+            OR: [
+                city ? { city: { contains: city, mode: 'insensitive' } } : undefined,
+                name ? { name: { contains: name, mode: 'insensitive' } } : undefined,
+                keywords ? { keywords: { has: keywords } } : undefined, // Use 'has' for arrays
+            ].filter(Boolean), // Remove any undefined filters
+        };
+        // Fetch matching properties
+        const properties = await prisma.common_property.findMany({
+            where: searchFilters,
+            include: {
+                common_propertyimages: true,
+            },
+        });
+
+        if (properties.length === 0) {
+            return res.status(404).json({
+                statusCode: 404,
+                message: 'No properties found matching the search criteria',
+            });
+        }
+
+        return res.status(200).json({
+            statusCode: 200,
+            message: 'Search retrieved successfully',
+            data: properties,
+        });
+
     } catch (error) {
-      res.status(500).json({
-        statusCode: 500,
-        message: 'Error searching properties',
-        error: error.message
-      });
+        console.error('Error in searchAndFilter:', error);
+        return res.status(500).json({
+            statusCode: 500,
+            message: 'Internal server error',
+            error: error.message,
+        });
     }
-  };
+};
+
+
 
 export const getSingleProperty = async (req, res) => {
     try {
