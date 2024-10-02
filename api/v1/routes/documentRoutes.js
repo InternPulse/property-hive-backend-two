@@ -1,11 +1,13 @@
-// const express = require('express');
-// const { deleteDocument } = require('../controllers/documentController');
-
 import express from 'express';
 import { deleteDocument, addDocument, getDocument } from '../controllers/documentController.js';
 import multer from 'multer';
+import dotenv from 'dotenv';
 
-const upload  = multer( { storage: multer.memoryStorage(), dest: 'tmp/' } );
+dotenv.config();
+
+const STATIC_FILE_DIRECTORY = process.env.STATIC_FILE_DIRECTORY;
+
+const upload  = multer( { storage: multer.memoryStorage(), dest: `${STATIC_FILE_DIRECTORY}/documents` } );
 
 const documentRoutes = express.Router();
 
