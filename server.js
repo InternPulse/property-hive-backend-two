@@ -6,6 +6,7 @@ import documentRoutes from './api/v1/routes/documentRoutes.js';
 import invoiceRouter from "./api/v1/routes/invoiceRoutes.js";
 import dotenv from 'dotenv';
 import cors from 'cors';
+import propertyImagesRoutes from "./api/v1/routes/propertyImagesRoutes.js";
 
 dotenv.config();
 
@@ -30,6 +31,7 @@ app.use('/api/v1', ratingRoutes);
 app.use("/api/v1", propertyRoutes);
 app.use("/api/v1", documentRoutes);
 app.use("/api/v1", invoiceRouter);
+app.use("/api/v1", propertyImagesRoutes);
 
 
 async function main() {

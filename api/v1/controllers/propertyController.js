@@ -32,20 +32,8 @@ export const addProperty = async (req, res) => {
     } = req.body;
 
     try {
-        
-        // Check if the sellerId exists in the User table
-        const sellerExists = await prisma.common_user.findUnique({
-            where: { id: Number(sellerId) }
-        });
-        
-        if (!sellerExists) {
-            return res.status(400).json({
-                statusCode: 400,
-                message: "Invalid sellerId: User (seller) does not exist"
-            });
-        }
-
-        if (!name ||
+        if (!sellerId ||
+            !name ||
             !state ||
             !city ||
             !address ||
@@ -73,6 +61,19 @@ export const addProperty = async (req, res) => {
                 installment_payment_price: ${installment_payment_price}`
             });
         }
+        
+        // Check if the sellerId exists in the User table
+        const sellerExists = await prisma.common_user.findUnique({
+            where: { id: Number(sellerId) }
+        });
+        
+        if (!sellerExists) {
+            return res.status(400).json({
+                statusCode: 400,
+                message: "Invalid sellerId: User (seller) does not exist"
+            });
+        }
+
 
         // Create the new property
         const newProperty = await prisma.common_property.create({
@@ -137,8 +138,8 @@ export const addProperty = async (req, res) => {
 
         console.log(newProperty);
 
-        return res.status(200).json({
-            statusCode: 200,
+        return res.status(201).json({
+            statusCode: 201,
             message: "Property added successfully",
             data: newProperty
         });
@@ -315,6 +316,13 @@ export const getSingleProperty = async (req, res) => {
                     select: {
                         id: true,
                         img: true
+                    }
+                },
+                common_propertydocuments: {
+                    select: {
+                        id: true,
+                        file_path: true,
+                        
                     }
                 }
             }

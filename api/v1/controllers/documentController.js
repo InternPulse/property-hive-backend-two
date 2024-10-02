@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import fs from 'fs';
+import path from "path";
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -33,15 +34,16 @@ export const deleteDocument = async (req, res) => {
             },
         });
         // Delete property document file from local disk.
-        fs.unlink(`${STATIC_FILE_DIRECTORY}/documents/${propertyDocument.file_path.split('/')[propertyDocument.file_path.split('/').length - 1]}`, (error) => {
+        fs.unlink(`${STATIC_FILE_DIRECTORY}/documents/${propertyDocument.file_path.split('/')[propertyDocument.file_path.split('/').length - 1]}`, (error) => { // getting document file name and path
             if (error) {
                 throw new Error(`Error during file remove: ${error.message}`);
             }
             console.log('File Deleted Successfully');
         });
 
-        propertyDocument.id = Number(propertyDocument.id)
-        propertyDocument.propertyid_id = Number(propertyDocument.propertyid_id);
+        // Seralize the id's from BigInt to Int
+        // propertyDocument.id = Number(propertyDocument.id)
+        // propertyDocument.propertyid_id = Number(propertyDocument.propertyid_id);
 
         return res.status(200).json({
             statusCode: 200,
@@ -72,7 +74,7 @@ export const addDocument = async (req, res) => {
         } = req.body;
 
         const documentFile = req.file;
-        
+
         // Check if property document exist or not.
         if (!(await prisma.common_property.findFirst({
             where: {
@@ -91,13 +93,14 @@ export const addDocument = async (req, res) => {
         if (typeof documentType !== 'string' || !documentFile) {
             return res.status(400).json({
                 statusCode: 400,
-                message: 'The provided fileds are not valid: '
+                message: `The provided fileds are not valid`
             });
         }
 
-        const fileName = `${Date.now()}-${propertyId}`;
+        const fileExtension = path.extname(documentFile.originalname);        
+        const fileName = `${Date.now()}${fileExtension}`;
 
-        // Save the property document in the local disk at /tmp directory.
+        // Save the property document in the local disk at /static/documents directory.
         fs.writeFile(`${STATIC_FILE_DIRECTORY}/documents/${fileName}`, documentFile.buffer, { encoding: 'utf-8' }, (error) => {
             if (error) {
                 throw new Error(error.message);
@@ -106,7 +109,7 @@ export const addDocument = async (req, res) => {
             }
         })
 
-        // Create Property Document at the database.
+        // Save Property Document info at the database.
         const propertyDocument = await prisma.common_propertydocuments.create({
             data: {
                 propertyid_id: Number(propertyId),
@@ -115,8 +118,9 @@ export const addDocument = async (req, res) => {
             }
         });
 
-        propertyDocument.id = Number(propertyDocument.id);
-        propertyDocument.propertyid_id = Number(propertyDocument.propertyid_id);
+        // Seralize the id's from BigInt to Int
+        // propertyDocument.id = Number(propertyDocument.id);
+        // propertyDocument.propertyid_id = Number(propertyDocument.propertyid_id);
 
         return res.status(201).json({
             statusCode: 201,
