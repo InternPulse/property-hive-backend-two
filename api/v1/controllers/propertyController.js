@@ -388,7 +388,7 @@ export const updateProperty = async (req, res) => {
         installment_duration,
         down_payment,
         installment_payment_price,
-        duration,
+        keywords
     } = req.body;
 
     try {
@@ -423,7 +423,7 @@ export const updateProperty = async (req, res) => {
                 installment_duration: installment_duration || findProperty.installment_duration,
                 down_payment: down_payment || findProperty.down_payment,
                 installment_payment_price: Number(installment_payment_price) || findProperty.installment_payment_price,
-                duration: duration || findProperty.duration
+                keywords: keywords === undefined ? findProperty.keywords : keywords.split(' '),
             }
         });
 

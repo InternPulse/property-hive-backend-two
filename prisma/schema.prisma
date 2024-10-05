@@ -41,7 +41,7 @@ model auth_permission {
 
 model authtoken_token {
   key         String      @id @db.VarChar(40)
-  created     DateTime @default(now())    @db.Timestamptz(6)
+  created     DateTime    @default(now()) @db.Timestamptz(6)
   user_id     Int         @unique
   common_user common_user @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "authtoken_token_user_id_35299eff_fk_common_user_id")
 
@@ -49,7 +49,7 @@ model authtoken_token {
 }
 
 model common_invoice {
-  id                  Int              @id @default(autoincrement())
+  id                  Int                 @id @default(autoincrement())
   payment_status      String              @db.VarChar(225)
   payment_method      String              @db.VarChar(225)
   note                String?
@@ -61,11 +61,11 @@ model common_invoice {
 }
 
 model common_kycdocuments {
-  id            Int      @id @default(autoincrement())
+  id            Int         @id @default(autoincrement())
   document_type String?     @db.VarChar(225)
   document_file String?     @db.VarChar(100)
   status        String      @db.VarChar(50)
-  uploaded_at   DateTime @default(now())    @db.Timestamptz(6)
+  uploaded_at   DateTime    @default(now()) @db.Timestamptz(6)
   userid_id     Int
   common_user   common_user @relation(fields: [userid_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "common_kycdocuments_userid_id_a2364936_fk_common_user_id")
 
@@ -73,12 +73,12 @@ model common_kycdocuments {
 }
 
 model common_profile {
-  id              Int      @id @default(autoincrement())
+  id              Int         @id @default(autoincrement())
   company_logo    String?     @db.VarChar(100)
   company_banner  String?     @db.VarChar(100)
   company_address String?     @db.VarChar(255)
   title           String?     @db.VarChar(50)
-  description     String      @db.Text
+  description     String
   instagram       String?     @db.VarChar(225)
   linkedin        String?     @db.VarChar(225)
   facebook        String?     @db.VarChar(225)
@@ -88,41 +88,40 @@ model common_profile {
 }
 
 model common_property {
-  id                       Int                     @id @default(autoincrement())
-  name                     String                     @db.VarChar(100)
-  state                    String                     @db.VarChar(255)
-  city                     String                     @db.VarChar(255)
-  address                  String                     @db.VarChar(255)
-  description              String                     @db.Text
-  squaremeters             String                     @db.VarChar(255)
-  property_type            String                     @db.VarChar(255)
-  number_of_bathrooms      Int?
-  number_of_bedrooms       Int?
-  installment_duration     String                     @db.VarChar(255)
-  payment_frequency        String                     @db.VarChar(255)
-  down_payment             String
+  id                        Int                        @id @default(autoincrement())
+  name                      String                     @db.VarChar(100)
+  state                     String                     @db.VarChar(255)
+  city                      String                     @db.VarChar(255)
+  address                   String                     @db.VarChar(255)
+  description               String
+  squaremeters              String                     @db.VarChar(255)
+  property_type             String                     @db.VarChar(255)
+  number_of_bathrooms       Int?
+  number_of_bedrooms        Int?
+  installment_duration      String                     @db.VarChar(255)
+  payment_frequency         String                     @db.VarChar(255)
+  down_payment              String
   installment_payment_price Int
-  duration                 String
-  keywords                 String?
-  price                    Int
-  is_sold                  Boolean        @default(false)
-  date_sold                DateTime?                  @db.Timestamptz(6)
-  created_at               DateTime                   @default(now()) @db.Timestamptz(6)
-  updated_at               DateTime                   @default(now()) @db.Timestamptz(6)
-  sellerid_id              Int
-  common_user              common_user                @relation(fields: [sellerid_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "common_property_sellerid_id_bb9f30d0_fk_common_user_id")
-  common_propertydocuments common_propertydocuments[]
-  common_propertyimages    common_propertyimages[]
-  common_ratings           common_ratings[]
-  common_soldproperties    common_soldproperties[]
-  common_transactions      common_transactions[]
-  common_userproperties    common_userproperties[]
+  keywords                  String[]                   @db.VarChar(200)
+  price                     Int
+  is_sold                   Boolean                    @default(false)
+  date_sold                 DateTime?                  @db.Timestamptz(6)
+  created_at                DateTime                   @default(now()) @db.Timestamptz(6)
+  updated_at                DateTime                   @default(now()) @db.Timestamptz(6)
+  sellerid_id               Int
+  common_user               common_user                @relation(fields: [sellerid_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "common_property_sellerid_id_bb9f30d0_fk_common_user_id")
+  common_propertydocuments  common_propertydocuments[]
+  common_propertyimages     common_propertyimages[]
+  common_ratings            common_ratings[]
+  common_soldproperties     common_soldproperties[]
+  common_transactions       common_transactions[]
+  common_userproperties     common_userproperties[]
 
   @@index([sellerid_id], map: "common_property_sellerid_id_bb9f30d0")
 }
 
 model common_propertydocuments {
-  id              Int          @id @default(autoincrement())
+  id              Int             @id @default(autoincrement())
   document_type   String?         @db.VarChar(225)
   img             String?         @db.VarChar(100)
   file_path       String?         @db.VarChar(100)
@@ -135,7 +134,7 @@ model common_propertydocuments {
 }
 
 model common_propertyimages {
-  id              Int          @id @default(autoincrement())
+  id              Int             @id @default(autoincrement())
   img             String?         @db.VarChar(100)
   propertyid_id   Int
   common_property common_property @relation(fields: [propertyid_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "common_propertyimage_propertyid_id_2cf5711f_fk_common_pr")
@@ -144,7 +143,7 @@ model common_propertyimages {
 }
 
 model common_ratings {
-  id              Int          @id @default(autoincrement())
+  id              Int             @id @default(autoincrement())
   comment         String?
   rate            Int
   created_at      DateTime        @default(now()) @db.Timestamptz(6)
@@ -159,7 +158,7 @@ model common_ratings {
 }
 
 model common_soldproperties {
-  id              Int          @id @default(autoincrement())
+  id              Int             @id @default(autoincrement())
   date_sold       DateTime        @db.Timestamptz(6)
   buyerid_id      Int
   propertyid_id   Int
@@ -171,12 +170,12 @@ model common_soldproperties {
 }
 
 model common_transactions {
-  id              Int           @id @default(autoincrement())
+  id              Int              @id @default(autoincrement())
   status          String           @db.VarChar(1)
   payment_method  String           @db.VarChar(255)
   total_amount    Int
-  created_at      DateTime      @default(now())     @db.Timestamptz(6)
-  updated_at      DateTime      @updatedAt         @db.Timestamptz(6)
+  created_at      DateTime         @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime         @updatedAt @db.Timestamptz(6)
   propertyid_id   Int
   userid_id       Int
   common_invoice  common_invoice[]
@@ -201,9 +200,11 @@ model common_user {
   is_active                    Boolean
   is_staff                     Boolean
   is_superuser                 Boolean
-  date_joined                  DateTime         @default(now())              @db.Timestamptz(6)
+  date_joined                  DateTime                       @default(now()) @db.Timestamptz(6)
   last_login                   DateTime?                      @db.Timestamptz(6)
-  updated_at                   DateTime         @updatedAt              @db.Timestamptz(6)
+  updated_at                   DateTime                       @updatedAt @db.Timestamptz(6)
+  email_verification_code      String?                        @db.VarChar(5)
+  email_verification_expiry    DateTime?                      @db.Timestamptz(6)
   authtoken_token              authtoken_token?
   common_kycdocuments          common_kycdocuments[]
   common_profile               common_profile?
@@ -222,7 +223,7 @@ model common_user {
 }
 
 model common_user_groups {
-  id          Int      @id @default(autoincrement())
+  id          Int         @id @default(autoincrement())
   user_id     Int
   group_id    Int
   common_user common_user @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "common_user_groups_user_id_92ddbe7a_fk_common_user_id")
@@ -233,7 +234,7 @@ model common_user_groups {
 }
 
 model common_user_user_permissions {
-  id            Int      @id @default(autoincrement())
+  id            Int         @id @default(autoincrement())
   user_id       Int
   permission_id Int
   common_user   common_user @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "common_user_user_permissions_user_id_56b84879_fk_common_user_id")
@@ -244,7 +245,7 @@ model common_user_user_permissions {
 }
 
 model common_userproperties {
-  id              Int          @id @default(autoincrement())
+  id              Int             @id @default(autoincrement())
   date_purchased  DateTime        @db.Timestamptz(6)
   propertyid_id   Int
   userid_id       Int
@@ -256,9 +257,9 @@ model common_userproperties {
 }
 
 model company_realestatecompany {
-  id         Int  @id @default(autoincrement())
+  id         Int     @id @default(autoincrement())
   custom_url String? @db.VarChar(255)
-  user_id    Int  @unique
+  user_id    Int     @unique
 }
 
 model custom_auth_user {

@@ -4,9 +4,11 @@ import ratingRoutes from './api/v1/routes/ratingRoutes.js';
 import propertyRoutes from "./api/v1/routes/propertyRoutes.js";
 import documentRoutes from './api/v1/routes/documentRoutes.js';
 import invoiceRouter from "./api/v1/routes/invoiceRoutes.js";
+import './instrument.js';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import propertyImagesRoutes from "./api/v1/routes/propertyImagesRoutes.js";
+import * as Sentry from '@sentry/node';
 
 dotenv.config();
 
@@ -15,6 +17,8 @@ const STATIC_FILE_DIRECTORY = process.env.STATIC_FILE_DIRECTORY;
 const PORT = process.env.PORT || 3000;
 
 const prisma = new PrismaClient();
+
+Sentry.init();
 
 const app = express();
 
@@ -33,6 +37,8 @@ app.use("/api/v1", documentRoutes);
 app.use("/api/v1", invoiceRouter);
 app.use("/api/v1", propertyImagesRoutes);
 
+// The error handler must be registered before any other error middleware and after all controllers
+Sentry.setupExpressErrorHandler(app);
 
 async function main() {
     try {
