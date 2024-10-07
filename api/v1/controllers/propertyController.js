@@ -94,6 +94,7 @@ export const addProperty = async (req, res) => {
                 down_payment: down_payment,
                 installment_payment_price: Number(installment_payment_price),
                 keywords: keywords.split(' '),
+                is_active: true,
             }
         });
 
