@@ -157,13 +157,17 @@ export const addProperty = async (req, res) => {
 
 export const getAllProperty = async (req, res) => {
     try {
-        const page = 1; 
-        const limit = 10; 
+        // Get page and limit from query parameters.
+        const page = parseInt(req.query.page) || 1; 
+        const limit = parseInt(req.query.limit) || 10; 
+
+        // Calculate the offset (number of records to skip)
+        const skip = (page -1 ) * limit;
 
         let [properties, totalCount] = await Promise.all([
             prisma.common_property.findMany({
-                skip: (page - 1) * limit,
-                take: limit,
+                skip: skip, // Skip base on page number
+                take: limit, // Limit number of properties returned
                 include: {
                     common_user: {
                         select: {
@@ -192,25 +196,15 @@ export const getAllProperty = async (req, res) => {
             });
         }
 
-        console.log(properties)
+        const totalPages = Math.ceil(totalCount / limit);
 
-        // Seralize the id's from BigInt to Int
-        // for (let property of properties) {
-        //     property.id = Number(property.id)
-        //     property.sellerid_id = Number(property.sellerid_id)
-        //     property.common_user.id = Number(property.common_user.id);
-
-        //     for (let propertyImg of property.common_propertyimages)
-        //         propertyImg.id = Number(propertyImg.id);
-        // }
-
-        console.log(properties)
         // Send successful response
         return res.status(200).json({
             statusCode: 200,
             totalCount,
             page,
             limit,
+            totalPages,
             properties
         });
 
