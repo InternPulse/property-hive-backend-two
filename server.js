@@ -4,6 +4,7 @@ import ratingRoutes from './api/v1/routes/ratingRoutes.js';
 import propertyRoutes from "./api/v1/routes/propertyRoutes.js";
 import documentRoutes from './api/v1/routes/documentRoutes.js';
 import invoiceRouter from "./api/v1/routes/invoiceRoutes.js";
+import purchaseRouter from "./api/v1/routes/purchaseRoutes.js";
 import './instrument.js';
 import dotenv from 'dotenv';
 import cors from 'cors';
@@ -31,11 +32,12 @@ app.use(`/${STATIC_FILE_DIRECTORY}/images`, express.static(`${STATIC_FILE_DIRECT
 app.use(`/${STATIC_FILE_DIRECTORY}/documents`, express.static(`${STATIC_FILE_DIRECTORY}/documents`));
 
 // API Routes
-app.use('/api/v1', ratingRoutes);
+app.use("/api/v1", ratingRoutes);
 app.use("/api/v1", propertyRoutes);
 app.use("/api/v1", documentRoutes);
 app.use("/api/v1", invoiceRouter);
 app.use("/api/v1", propertyImagesRoutes);
+app.use("/api/v1", purchaseRouter);
 
 // The error handler must be registered before any other error middleware and after all controllers
 Sentry.setupExpressErrorHandler(app);
@@ -58,5 +60,3 @@ async function main() {
 main();
 
 export default app; // Export app for use in tests
-
-

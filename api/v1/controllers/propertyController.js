@@ -66,7 +66,7 @@ export const addProperty = async (req, res) => {
         const sellerExists = await prisma.common_user.findUnique({
             where: { id: Number(sellerId) }
         });
-        
+
         if (!sellerExists) {
             return res.status(400).json({
                 statusCode: 400,
@@ -74,6 +74,13 @@ export const addProperty = async (req, res) => {
             });
         }
 
+        // Check if the property image provided.
+        if (!req.files['propertyImage']) {
+            return res.status(400).json({
+                statusCode: 400,
+                message: "Property Images is missing",
+            });
+        }
 
         // Create the new property
         const newProperty = await prisma.common_property.create({
