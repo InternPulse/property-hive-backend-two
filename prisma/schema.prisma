@@ -1,0 +1,357 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_DSN")
+}
+
+model auth_group {
+  id                     Int                      @id @default(autoincrement())
+  name                   String                   @unique @db.VarChar(150)
+  auth_group_permissions auth_group_permissions[]
+
+  @@index([name], map: "auth_group_name_a6ea08ec_like")
+}
+
+model auth_group_permissions {
+  id              BigInt          @id @default(autoincrement())
+  group_id        Int
+  permission_id   Int
+  auth_permission auth_permission @relation(fields: [permission_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "auth_group_permissio_permission_id_84c5c92e_fk_auth_perm")
+  auth_group      auth_group      @relation(fields: [group_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "auth_group_permissions_group_id_b120cbf9_fk_auth_group_id")
+
+  @@unique([group_id, permission_id], map: "auth_group_permissions_group_id_permission_id_0cd325b0_uniq")
+  @@index([group_id], map: "auth_group_permissions_group_id_b120cbf9")
+  @@index([permission_id], map: "auth_group_permissions_permission_id_84c5c92e")
+}
+
+model auth_permission {
+  id                     Int                      @id @default(autoincrement())
+  name                   String                   @db.VarChar(255)
+  content_type_id        Int
+  codename               String                   @db.VarChar(100)
+  auth_group_permissions auth_group_permissions[]
+  django_content_type    django_content_type      @relation(fields: [content_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "auth_permission_content_type_id_2f476e4b_fk_django_co")
+
+  @@unique([content_type_id, codename], map: "auth_permission_content_type_id_codename_01ab375a_uniq")
+  @@index([content_type_id], map: "auth_permission_content_type_id_2f476e4b")
+}
+
+model authtoken_token {
+  key         String      @id @db.VarChar(40)
+  created     DateTime    @default(now()) @db.Timestamptz(6)
+  user_id     Int         @unique
+  common_user common_user @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "authtoken_token_user_id_35299eff_fk_common_user_id")
+
+  @@index([key], map: "authtoken_token_key_10f0b77e_like")
+}
+
+model common_invoice {
+  id                  Int                 @id @default(autoincrement())
+  payment_status      String              @db.VarChar(225)
+  payment_method      String              @db.VarChar(225)
+  note                String?
+  issue_date          DateTime            @default(now()) @db.Timestamptz(6)
+  transactionid_id    Int
+  common_transactions common_transactions @relation(fields: [transactionid_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "common_invoice_transactionid_id_58932cdd_fk_common_tr")
+
+  @@index([transactionid_id], map: "common_invoice_transactionid_id_58932cdd")
+}
+
+model common_kycdocuments {
+  id            Int         @id @default(autoincrement())
+  document_type String?     @db.VarChar(225)
+  document_file String?     @db.VarChar(100)
+  status        String      @db.VarChar(50)
+  uploaded_at   DateTime    @default(now()) @db.Timestamptz(6)
+  userid_id     Int
+  common_user   common_user @relation(fields: [userid_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "common_kycdocuments_userid_id_a2364936_fk_common_user_id")
+
+  @@index([userid_id], map: "common_kycdocuments_userid_id_a2364936")
+}
+
+model common_profile {
+  id                 Int                  @id @default(autoincrement())
+  company_logo       String?              @db.VarChar(100)
+  company_banner     String?              @db.VarChar(100)
+  company_address    String?              @db.VarChar(255)
+  title              String?              @db.VarChar(50)
+  description        String
+  instagram          String?              @db.VarChar(225)
+  linkedin           String?              @db.VarChar(225)
+  facebook           String?              @db.VarChar(225)
+  twitter            String?              @db.VarChar(225)
+  userid_id          Int                  @unique
+  common_companyview common_companyview[]
+  common_user        common_user          @relation(fields: [userid_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "common_profile_userid_id_b0b0445b_fk_common_user_id")
+}
+
+model common_property {
+  id                        Int                        @id @default(autoincrement())
+  name                      String                     @db.VarChar(100)
+  state                     String                     @db.VarChar(255)
+  city                      String                     @db.VarChar(255)
+  address                   String                     @db.VarChar(255)
+  description               String
+  squaremeters              String                     @db.VarChar(255)
+  property_type             String                     @db.VarChar(255)
+  number_of_bathrooms       Int?
+  number_of_bedrooms        Int?
+  installment_duration      String                     @db.VarChar(255)
+  payment_frequency         String                     @db.VarChar(255)
+  down_payment              String
+  installment_payment_price Int
+  keywords                  String[]                   @db.VarChar(200)
+  price                     Int
+  is_sold                   Boolean                    @default(false)
+  date_sold                 DateTime?                  @db.Timestamptz(6)
+  created_at                DateTime                   @default(now()) @db.Timestamptz(6)
+  updated_at                DateTime                   @default(now()) @db.Timestamptz(6)
+  sellerid_id               Int
+  is_active                 Boolean
+  common_user               common_user                @relation(fields: [sellerid_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "common_property_sellerid_id_bb9f30d0_fk_common_user_id")
+  common_propertydocuments  common_propertydocuments[]
+  common_propertyimages     common_propertyimages[]
+  common_ratings            common_ratings[]
+  common_soldproperties     common_soldproperties[]
+  common_transactions       common_transactions[]
+  common_userproperties     common_userproperties[]
+
+  @@index([sellerid_id], map: "common_property_sellerid_id_bb9f30d0")
+}
+
+model common_propertydocuments {
+  id              Int             @id @default(autoincrement())
+  document_type   String?         @db.VarChar(225)
+  img             String?         @db.VarChar(100)
+  file_path       String?         @db.VarChar(100)
+  created_at      DateTime        @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime        @default(now()) @db.Timestamptz(6)
+  propertyid_id   Int
+  common_property common_property @relation(fields: [propertyid_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "common_propertydocum_propertyid_id_05e247a2_fk_common_pr")
+
+  @@index([propertyid_id], map: "common_propertydocuments_propertyid_id_05e247a2")
+}
+
+model common_propertyimages {
+  id              Int             @id @default(autoincrement())
+  img             String?         @db.VarChar(100)
+  propertyid_id   Int
+  common_property common_property @relation(fields: [propertyid_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "common_propertyimage_propertyid_id_2cf5711f_fk_common_pr")
+
+  @@index([propertyid_id], map: "common_propertyimages_propertyid_id_2cf5711f")
+}
+
+model common_ratings {
+  id              Int             @id @default(autoincrement())
+  comment         String?
+  rate            Int
+  created_at      DateTime        @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime        @default(now()) @db.Timestamptz(6)
+  propertyid_id   Int
+  userid_id       Int
+  common_property common_property @relation(fields: [propertyid_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "common_ratings_propertyid_id_0d36135f_fk_common_property_id")
+  common_user     common_user     @relation(fields: [userid_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "common_ratings_userid_id_04409bdf_fk_common_user_id")
+
+  @@index([propertyid_id], map: "common_ratings_propertyid_id_0d36135f")
+  @@index([userid_id], map: "common_ratings_userid_id_04409bdf")
+}
+
+model common_soldproperties {
+  id              Int             @id @default(autoincrement())
+  date_sold       DateTime        @db.Timestamptz(6)
+  buyerid_id      Int
+  propertyid_id   Int
+  common_property common_property @relation(fields: [propertyid_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "common_soldpropertie_propertyid_id_f3741f3a_fk_common_pr")
+  common_user     common_user     @relation(fields: [buyerid_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "common_soldproperties_buyerid_id_fdb63b24_fk_common_user_id")
+
+  @@index([buyerid_id], map: "common_soldproperties_buyerid_id_fdb63b24")
+  @@index([propertyid_id], map: "common_soldproperties_propertyid_id_f3741f3a")
+}
+
+model common_transactions {
+  id              Int              @id @default(autoincrement())
+  status          String           @db.VarChar(1)
+  payment_method  String           @db.VarChar(255)
+  total_amount    Int
+  created_at      DateTime         @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime         @updatedAt @db.Timestamptz(6)
+  propertyid_id   Int
+  userid_id       Int
+  common_invoice  common_invoice[]
+  common_property common_property  @relation(fields: [propertyid_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "common_transactions_propertyid_id_5dfb9f92_fk_common_pr")
+  common_user     common_user      @relation(fields: [userid_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "common_transactions_userid_id_a026d2aa_fk_common_user_id")
+
+  @@index([propertyid_id], map: "common_transactions_propertyid_id_5dfb9f92")
+  @@index([userid_id], map: "common_transactions_userid_id_a026d2aa")
+}
+
+model common_user {
+  password                     String                         @db.VarChar(128)
+  id                           Int                            @id @default(autoincrement())
+  email                        String                         @unique @db.VarChar(254)
+  fname                        String                         @db.VarChar(255)
+  lname                        String                         @db.VarChar(255)
+  business_name                String?                        @unique @db.VarChar(255)
+  phone_number                 String?                        @unique @db.VarChar(20)
+  profile_picture              String?                        @db.VarChar(100)
+  custom_url                   String?                        @db.VarChar(500)
+  is_company                   Boolean
+  is_active                    Boolean
+  is_staff                     Boolean
+  is_superuser                 Boolean
+  date_joined                  DateTime                       @default(now()) @db.Timestamptz(6)
+  last_login                   DateTime?                      @db.Timestamptz(6)
+  updated_at                   DateTime                       @updatedAt @db.Timestamptz(6)
+  email_verification_code      String?                        @db.VarChar(5)
+  email_verification_expiry    DateTime?                      @db.Timestamptz(6)
+  authtoken_token              authtoken_token?
+  common_kycdocuments          common_kycdocuments[]
+  common_profile               common_profile?
+  common_property              common_property[]
+  common_ratings               common_ratings[]
+  common_soldproperties        common_soldproperties[]
+  common_transactions          common_transactions[]
+  common_user_groups           common_user_groups[]
+  common_user_user_permissions common_user_user_permissions[]
+  common_userproperties        common_userproperties[]
+  django_admin_log             django_admin_log[]
+
+  @@index([business_name], map: "common_user_business_name_cc365e09_like")
+  @@index([email], map: "common_user_email_10572c84_like")
+  @@index([phone_number], map: "common_user_phone_number_04aa6cec_like")
+}
+
+model common_user_groups {
+  id          Int         @id @default(autoincrement())
+  user_id     Int
+  group_id    Int
+  common_user common_user @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "common_user_groups_user_id_92ddbe7a_fk_common_user_id")
+
+  @@unique([user_id, group_id], map: "common_user_groups_user_id_group_id_ba201ca9_uniq")
+  @@index([group_id], map: "common_user_groups_group_id_27a26245")
+  @@index([user_id], map: "common_user_groups_user_id_92ddbe7a")
+}
+
+model common_user_user_permissions {
+  id            Int         @id @default(autoincrement())
+  user_id       Int
+  permission_id Int
+  common_user   common_user @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "common_user_user_permissions_user_id_56b84879_fk_common_user_id")
+
+  @@unique([user_id, permission_id], map: "common_user_user_permiss_user_id_permission_id_5694f4c4_uniq")
+  @@index([permission_id], map: "common_user_user_permissions_permission_id_a6da427c")
+  @@index([user_id], map: "common_user_user_permissions_user_id_56b84879")
+}
+
+model common_userproperties {
+  id              Int             @id @default(autoincrement())
+  date_purchased  DateTime        @db.Timestamptz(6)
+  propertyid_id   Int
+  userid_id       Int
+  common_property common_property @relation(fields: [propertyid_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "common_userpropertie_propertyid_id_29457a5e_fk_common_pr")
+  common_user     common_user     @relation(fields: [userid_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "common_userproperties_userid_id_72db9650_fk_common_user_id")
+
+  @@index([propertyid_id], map: "common_userproperties_propertyid_id_29457a5e")
+  @@index([userid_id], map: "common_userproperties_userid_id_72db9650")
+}
+
+model company_realestatecompany {
+  id         Int     @id @default(autoincrement())
+  custom_url String? @db.VarChar(255)
+  user_id    Int     @unique
+}
+
+model custom_auth_user {
+  id                                BigInt                              @id @default(autoincrement())
+  password                          String                              @db.VarChar(128)
+  last_login                        DateTime?                           @db.Timestamptz(6)
+  is_superuser                      Boolean
+  email                             String                              @unique @db.VarChar(254)
+  username                          String                              @unique @db.VarChar(150)
+  user_type                         String                              @db.VarChar(10)
+  is_active                         Boolean
+  is_staff                          Boolean
+  custom_auth_user_groups           custom_auth_user_groups[]
+  custom_auth_user_user_permissions custom_auth_user_user_permissions[]
+
+  @@index([email], map: "custom_auth_user_email_8e3f8ced_like")
+  @@index([username], map: "custom_auth_user_username_bc76db7a_like")
+}
+
+model custom_auth_user_groups {
+  id               BigInt           @id @default(autoincrement())
+  user_id          BigInt
+  group_id         Int
+  custom_auth_user custom_auth_user @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "custom_auth_user_groups_user_id_0e71eb5f_fk_custom_auth_user_id")
+
+  @@unique([user_id, group_id], map: "custom_auth_user_groups_user_id_group_id_07773560_uniq")
+  @@index([group_id], map: "custom_auth_user_groups_group_id_be8803b9")
+  @@index([user_id], map: "custom_auth_user_groups_user_id_0e71eb5f")
+}
+
+model custom_auth_user_user_permissions {
+  id               BigInt           @id @default(autoincrement())
+  user_id          BigInt
+  permission_id    Int
+  custom_auth_user custom_auth_user @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "custom_auth_user_use_user_id_f8893b66_fk_custom_au")
+
+  @@unique([user_id, permission_id], map: "custom_auth_user_user_pe_user_id_permission_id_e2cda069_uniq")
+  @@index([permission_id], map: "custom_auth_user_user_permissions_permission_id_0427cb51")
+  @@index([user_id], map: "custom_auth_user_user_permissions_user_id_f8893b66")
+}
+
+model django_admin_log {
+  id                  Int                  @id @default(autoincrement())
+  action_time         DateTime             @db.Timestamptz(6)
+  object_id           String?
+  object_repr         String               @db.VarChar(200)
+  action_flag         Int                  @db.SmallInt
+  change_message      String
+  content_type_id     Int?
+  user_id             Int
+  django_content_type django_content_type? @relation(fields: [content_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "django_admin_log_content_type_id_c4bce8eb_fk_django_co")
+  common_user         common_user          @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "django_admin_log_user_id_c564eba6_fk_common_user_id")
+
+  @@index([content_type_id], map: "django_admin_log_content_type_id_c4bce8eb")
+  @@index([user_id], map: "django_admin_log_user_id_c564eba6")
+}
+
+model django_content_type {
+  id               Int                @id @default(autoincrement())
+  app_label        String             @db.VarChar(100)
+  model            String             @db.VarChar(100)
+  auth_permission  auth_permission[]
+  django_admin_log django_admin_log[]
+
+  @@unique([app_label, model], map: "django_content_type_app_label_model_76bd3d3b_uniq")
+}
+
+model django_migrations {
+  id      BigInt   @id @default(autoincrement())
+  app     String   @db.VarChar(255)
+  name    String   @db.VarChar(255)
+  applied DateTime @db.Timestamptz(6)
+}
+
+model django_session {
+  session_key  String   @id @db.VarChar(40)
+  session_data String
+  expire_date  DateTime @db.Timestamptz(6)
+
+  @@index([expire_date], map: "django_session_expire_date_a5c62663")
+  @@index([session_key], map: "django_session_session_key_c0390e0f_like")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model common_companyview {
+  id             BigInt         @id @default(autoincrement())
+  viewed_on      DateTime       @db.Date
+  views          Int
+  profile_id     Int
+  common_profile common_profile @relation(fields: [profile_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "common_companyview_profile_id_3f4edc3c_fk_common_profile_id")
+
+  @@index([profile_id], map: "common_companyview_profile_id_3f4edc3c")
+}
