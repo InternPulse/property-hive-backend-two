@@ -2,9 +2,9 @@
 
 ## Project Overview
 
-Live link is at 
+Live link is at http://express-api.propertyhive.com.ng/api/v1
 
-Doc link at 
+Doc link at https://documenter.getpostman.com/view/34635068/2sAXqzVxVn
 
 ## Installation Instructions
 ### Prerequisites
