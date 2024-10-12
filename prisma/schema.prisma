@@ -73,18 +73,19 @@ model common_kycdocuments {
 }
 
 model common_profile {
-  id              Int         @id @default(autoincrement())
-  company_logo    String?     @db.VarChar(100)
-  company_banner  String?     @db.VarChar(100)
-  company_address String?     @db.VarChar(255)
-  title           String?     @db.VarChar(50)
-  description     String
-  instagram       String?     @db.VarChar(225)
-  linkedin        String?     @db.VarChar(225)
-  facebook        String?     @db.VarChar(225)
-  twitter         String?     @db.VarChar(225)
-  userid_id       Int         @unique
-  common_user     common_user @relation(fields: [userid_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "common_profile_userid_id_b0b0445b_fk_common_user_id")
+  id                 Int                  @id @default(autoincrement())
+  company_logo       String?              @db.VarChar(100)
+  company_banner     String?              @db.VarChar(100)
+  company_address    String?              @db.VarChar(255)
+  title              String?              @db.VarChar(50)
+  description        String
+  instagram          String?              @db.VarChar(225)
+  linkedin           String?              @db.VarChar(225)
+  facebook           String?              @db.VarChar(225)
+  twitter            String?              @db.VarChar(225)
+  userid_id          Int                  @unique
+  common_companyview common_companyview[]
+  common_user        common_user          @relation(fields: [userid_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "common_profile_userid_id_b0b0445b_fk_common_user_id")
 }
 
 model common_property {
@@ -109,6 +110,7 @@ model common_property {
   created_at                DateTime                   @default(now()) @db.Timestamptz(6)
   updated_at                DateTime                   @default(now()) @db.Timestamptz(6)
   sellerid_id               Int
+  is_active                 Boolean
   common_user               common_user                @relation(fields: [sellerid_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "common_property_sellerid_id_bb9f30d0_fk_common_user_id")
   common_propertydocuments  common_propertydocuments[]
   common_propertyimages     common_propertyimages[]
@@ -341,4 +343,15 @@ model django_session {
 
   @@index([expire_date], map: "django_session_expire_date_a5c62663")
   @@index([session_key], map: "django_session_session_key_c0390e0f_like")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model common_companyview {
+  id             BigInt         @id @default(autoincrement())
+  viewed_on      DateTime       @db.Date
+  views          Int
+  profile_id     Int
+  common_profile common_profile @relation(fields: [profile_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "common_companyview_profile_id_3f4edc3c_fk_common_profile_id")
+
+  @@index([profile_id], map: "common_companyview_profile_id_3f4edc3c")
 }
